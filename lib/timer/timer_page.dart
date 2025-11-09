@@ -93,10 +93,12 @@ class _TimerPageState extends State<TimerPage> {
             colors: [Colors.purple.shade50, Colors.blue.shade50],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
+        child: SafeArea(
+          bottom: true,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
               if (_timerService.status == TimerStatus.stopped)
                 Expanded(
                   child: Column(
@@ -118,6 +120,7 @@ class _TimerPageState extends State<TimerPage> {
                               vertical: 16,
                             ),
                             backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
@@ -153,7 +156,8 @@ class _TimerPageState extends State<TimerPage> {
                     ],
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

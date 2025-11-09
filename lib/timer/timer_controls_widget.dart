@@ -19,16 +19,8 @@ class TimerControlsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -38,15 +30,15 @@ class TimerControlsWidget extends StatelessWidget {
             ElevatedButton(
               onPressed: onStart,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.zero,
                 shape: const CircleBorder(),
                 backgroundColor: Colors.green,
-                minimumSize: const Size(70, 70),
-                maximumSize: const Size(70, 70),
+                fixedSize: const Size(72, 72),
+                alignment: Alignment.center,
               ),
               child: const Icon(
                 Icons.play_arrow,
-                size: 35,
+                size: 36,
                 color: Colors.white,
               ),
             ),
@@ -54,24 +46,24 @@ class TimerControlsWidget extends StatelessWidget {
             ElevatedButton(
               onPressed: onPause,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.zero,
                 shape: const CircleBorder(),
                 backgroundColor: Colors.orange,
-                minimumSize: const Size(70, 70),
-                maximumSize: const Size(70, 70),
+                fixedSize: const Size(72, 72),
+                alignment: Alignment.center,
               ),
-              child: const Icon(Icons.pause, size: 35, color: Colors.white),
+              child: const Icon(Icons.pause, size: 36, color: Colors.white),
             ),
           ElevatedButton(
             onPressed: onReset,
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.zero,
               shape: const CircleBorder(),
               backgroundColor: Colors.red,
-              minimumSize: const Size(70, 70),
-              maximumSize: const Size(70, 70),
+              fixedSize: const Size(72, 72),
+              alignment: Alignment.center,
             ),
-            child: const Icon(Icons.stop, size: 35, color: Colors.white),
+            child: const Icon(Icons.stop, size: 36, color: Colors.white),
           ),
         ],
       ),

@@ -29,6 +29,8 @@ class TimerService extends ChangeNotifier {
 
   // Halfway point sound flag
   bool _halfwaySoundPlayed = false;
+  // Second half state flag for UI highlighting
+  bool _isInSecondHalf = false;
 
   TimerService();
 
@@ -162,15 +164,31 @@ class TimerService extends ChangeNotifier {
       _remainingTime--;
       debugPrint('Decremented time to: $_remainingTime');
 
+      // Countdown signals at 3/2/1 seconds
+      if (_remainingTime == 3) {
+        debugPrint('Playing countdown sound: 3');
+        _playCountdownSound(3);
+      } else if (_remainingTime == 2) {
+        debugPrint('Playing countdown sound: 2');
+        _playCountdownSound(2);
+      } else if (_remainingTime == 1) {
+        debugPrint('Playing countdown sound: 1');
+        _playCountdownSound(1);
+      }
+
       // Play halfway sound if needed (только для основных блоков, не для подготовки)
       final currentItem = this.currentItem;
       if (_remainingTime > 0 && // Make sure we still have time
           currentItem != null &&
           !_halfwaySoundPlayed &&
+          // Only for timers longer than 30 sec
+          currentItem.duration > 30 &&
+          // Halfway computed as integer division (floor), e.g., 31 -> 15
           _remainingTime == (currentItem.duration ~/ 2)) {
         debugPrint('Playing halfway sound');
         _playHalfwaySound();
         _halfwaySoundPlayed = true;
+        _isInSecondHalf = true;
       }
 
       notifyListeners();
@@ -204,6 +222,7 @@ class TimerService extends ChangeNotifier {
           _currentRepeat = 0;
           _remainingTime = firstBlock.items[0].duration;
           _halfwaySoundPlayed = false;
+          _isInSecondHalf = false;
           debugPrint('Moved to first block item with duration $_remainingTime');
         }
       }
@@ -226,6 +245,7 @@ class TimerService extends ChangeNotifier {
       _currentItemIndex++;
       _remainingTime = currentBlock.items[_currentItemIndex].duration;
       _halfwaySoundPlayed = false;
+      _isInSecondHalf = false;
       debugPrint('Moved to next item in block with duration $_remainingTime');
       return;
     }
@@ -237,6 +257,7 @@ class TimerService extends ChangeNotifier {
       _currentItemIndex = 0;
       _remainingTime = currentBlock.items[0].duration;
       _halfwaySoundPlayed = false;
+      _isInSecondHalf = false;
       debugPrint('Moved to next repeat of block with duration $_remainingTime');
       return;
     }
@@ -252,6 +273,7 @@ class TimerService extends ChangeNotifier {
       if (nextBlock.items.isNotEmpty) {
         _remainingTime = nextBlock.items[0].duration;
         _halfwaySoundPlayed = false;
+        _isInSecondHalf = false;
         debugPrint('Moved to next block with duration $_remainingTime');
       }
       return;
@@ -263,37 +285,67 @@ class TimerService extends ChangeNotifier {
     _timer?.cancel();
   }
 
-  // Play sound at halfway point
+  // Play sound at halfway point (single beep asset with medium pitch)
   Future<void> _playHalfwaySound() async {
-    try {
-      // In a real app, we would play a sound file here
-      // For now, we'll just print to console
-      debugPrint('Halfway sound played');
-      // Example of how to play a sound:
-      // await _audioPlayer.play(AssetSource('sounds/halfway.mp3'));
-    } catch (e) {
-      debugPrint('Error playing halfway sound: $e');
-    }
+    await _playBeep(rate: 1.2, volume: 0.7);
+    debugPrint('Halfway sound played');
   }
 
-  // Play sound at end of timer block
+  // Play sound at end of timer block (single beep asset with highest pitch)
   Future<void> _playEndSound() async {
+    await _playBeep(rate: 1.6, volume: 1.0);
+    debugPrint('End sound played');
+  }
+
+  // Play sound for countdown (3/2/1) with increasing pitch using single asset
+  Future<void> _playCountdownSound(int secondsLeft) async {
+    double rate = 1.0;
+    double volume = 0.6;
+    if (secondsLeft == 3) {
+      rate = 1.0; // низкая тональность
+      volume = 0.6;
+    } else if (secondsLeft == 2) {
+      rate = 1.2; // средняя тональность
+      volume = 0.7;
+    } else if (secondsLeft == 1) {
+      rate = 1.4; // высокая тональность
+      volume = 0.8;
+    }
+    await _playBeep(rate: rate, volume: volume);
+  }
+
+  // Unified beep player using single asset and variable playback rate
+  Future<void> _playBeep({double rate = 1.0, double volume = 0.8}) async {
     try {
-      // In a real app, we would play a sound file here
-      // For now, we'll just print to console
-      debugPrint('End sound played');
-      // Example of how to play a sound:
-      // await _audioPlayer.play(AssetSource('sounds/end.mp3'));
+      await _audioPlayer.setVolume(volume);
+      try {
+        await _audioPlayer.setPlaybackRate(rate);
+      } catch (e) {
+        debugPrint('Playback rate not supported on this platform: $e');
+      }
+      await _audioPlayer.play(AssetSource('sounds/beep.mp3'));
     } catch (e) {
-      debugPrint('Error playing end sound: $e');
+      debugPrint('Error playing beep: $e');
     }
   }
 
-  // Format time as MM:SS
-  String formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  // Динамическое форматирование времени:
+  // <60 сек -> SS
+  // <60 мин -> MM:SS
+  // >=60 мин -> HH:MM:SS
+  String formatTime(int totalSeconds) {
+    if (totalSeconds < 60) {
+      return totalSeconds.toString().padLeft(2, '0');
+    }
+
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   // Get current phase for color coding
@@ -315,4 +367,7 @@ class TimerService extends ChangeNotifier {
     _audioPlayer.dispose();
     super.dispose();
   }
+
+  // Expose UI helpers
+  bool get isInSecondHalf => _isInSecondHalf;
 }
