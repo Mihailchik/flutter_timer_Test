@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TimeInputWidget extends StatefulWidget {
   final int initialSeconds;
@@ -59,26 +60,34 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
   }
 
   int _parseTime(String timeString) {
-    if (timeString.contains(':')) {
-      final parts = timeString.split(':');
-      if (parts.length == 2) {
-        try {
-          final minutes = int.tryParse(parts[0]) ?? 0;
-          final seconds = int.tryParse(parts[1]) ?? 0;
-          return minutes * 60 + seconds;
-        } catch (e) {
-          // В случае ошибки возвращаем 0
-        }
+    // Санитизация: оставляем только цифры и двоеточие
+    final sanitized = timeString.replaceAll(RegExp(r'[^0-9:]'), '');
+
+    if (sanitized.contains(':')) {
+      final rawParts = sanitized.split(':');
+      // Рассматриваем только первые два компонента
+      final parts = rawParts.length >= 2
+          ? [rawParts[0], rawParts[1]]
+          : [rawParts[0], '0'];
+      try {
+        int minutes = int.tryParse(parts[0]) ?? 0;
+        int seconds = int.tryParse(parts[1]) ?? 0;
+        // Ограничиваем секунды диапазоном 0..59
+        seconds = seconds.clamp(0, 59);
+        return minutes * 60 + seconds;
+      } catch (e) {
+        // В случае ошибки возвращаем начальное значение
+        return widget.initialSeconds;
       }
     }
-    // Если формат не MM:SS, попробуем интерпретировать как секунды
+    // Если формат не MM:SS, пробуем интерпретировать как секунды
     try {
-      final seconds = int.tryParse(timeString) ?? 0;
+      final seconds = int.tryParse(sanitized) ?? 0;
       return seconds;
     } catch (e) {
-      // В случае ошибки возвращаем 0
+      // В случае ошибки возвращаем исходное значение
+      return widget.initialSeconds;
     }
-    return widget.initialSeconds;
   }
 
   void _onTextChanged() {
@@ -142,6 +151,9 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
               ),
               style: const TextStyle(fontSize: 14), // Увеличили размер шрифта
               keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9:]+')),
+              ],
               onChanged: (value) {
                 // Обработка изменений в реальном времени
                 if (!_isFormatting) {

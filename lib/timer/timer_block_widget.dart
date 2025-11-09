@@ -184,106 +184,113 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Stack(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Название блока',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                    ),
-                    style: const TextStyle(fontSize: 14),
-                    onChanged: (value) => _updateBlock(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Поле повторов с кнопками
-                SizedBox(
-                  width: 140, // Увеличили ширину
+                // Основная строка шапки: имя блока и повторы. Паддинг справа под кнопку удаления.
+                Padding(
+                  padding: const EdgeInsets.only(right: 48.0),
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 70, // Увеличили ширину поля
+                      Expanded(
                         child: TextField(
-                          controller: _repeatsController,
-                          keyboardType: TextInputType.number,
+                          controller: _nameController,
                           decoration: const InputDecoration(
-                            labelText: 'Повторы',
+                            labelText: 'Название блока',
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(
-                              horizontal: 8, // Увеличили padding
-                              vertical: 12, // Увеличили вертикальный padding
+                              horizontal: 8,
+                              vertical: 8,
                             ),
                           ),
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ), // Увеличили размер шрифта
+                          style: const TextStyle(fontSize: 14),
                           onChanged: (value) => _updateBlock(),
                         ),
                       ),
-                      const SizedBox(width: 8), // Увеличили расстояние
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Увеличенные кнопки со стрелками для повторов
-                          SizedBox(
-                            width: 32, // Увеличили ширину
-                            height: 32, // Увеличили высоту
-                            child: ElevatedButton(
-                              onPressed: _increaseRepeats,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.all(0),
-                                shape: const CircleBorder(),
-                                minimumSize: const Size(32, 32),
+                      const SizedBox(width: 8),
+                      // Поле повторов с кнопками
+                      SizedBox(
+                        width: 140,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 70,
+                              child: TextField(
+                                controller: _repeatsController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Повторы',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                style: const TextStyle(fontSize: 14),
+                                onChanged: (value) => _updateBlock(),
                               ),
-                              child: const Icon(
-                                Icons.arrow_drop_up,
-                                size: 24,
-                              ), // Увеличили размер иконки
                             ),
-                          ),
-                          const SizedBox(
-                            height: 4,
-                          ), // Увеличили расстояние между кнопками
-                          SizedBox(
-                            width: 32, // Увеличили ширину
-                            height: 32, // Увеличили высоту
-                            child: ElevatedButton(
-                              onPressed: _decreaseRepeats,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.all(0),
-                                shape: const CircleBorder(),
-                                minimumSize: const Size(32, 32),
-                              ),
-                              child: const Icon(
-                                Icons.arrow_drop_down,
-                                size: 24,
-                              ), // Увеличили размер иконки
+                            const SizedBox(width: 8),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 32,
+                                  height: 32,
+                                  child: ElevatedButton(
+                                    onPressed: _increaseRepeats,
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.all(0),
+                                      shape: const CircleBorder(),
+                                      minimumSize: const Size(32, 32),
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_drop_up,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                SizedBox(
+                                  width: 32,
+                                  height: 32,
+                                  child: ElevatedButton(
+                                    onPressed: _decreaseRepeats,
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.all(0),
+                                      shape: const CircleBorder(),
+                                      minimumSize: const Size(32, 32),
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_drop_down,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                // Кнопка удаления поверх справа, не влияет на раскладку
                 if (widget.showDeleteButton)
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                      size: 24,
-                    ), // Увеличили размер иконки
-                    onPressed: widget.onDelete,
-                    padding: const EdgeInsets.all(8), // Увеличили padding
-                    constraints: const BoxConstraints(
-                      minWidth: 40, // Увеличили минимальную ширину
-                      minHeight: 40, // Увеличили минимальную высоту
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      onPressed: widget.onDelete,
+                      padding: const EdgeInsets.all(4),
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   ),
               ],
@@ -314,9 +321,8 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Название таймера
-                    SizedBox(
-                      width: 150,
+                    // Название таймера — гибкое поле, занимает доступное место
+                    Expanded(
                       child: TextField(
                         controller: nameController,
                         decoration: const InputDecoration(
@@ -333,28 +339,40 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                     ),
                     const SizedBox(width: 8),
                     // Поле ввода времени с кнопками
-                    TimeInputWidget(
-                      initialSeconds: item.duration,
-                      onTimeChanged: (newDuration) =>
-                          _updateItemTime(index, newDuration),
-                      label: 'MM:SS',
+                    Builder(
+                      builder: (context) {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        double timeWidth =
+                            (screenWidth - 32) * 0.28; // доля ширины
+                        timeWidth = timeWidth.clamp(140.0, 200.0);
+                        return SizedBox(
+                          width: timeWidth,
+                          child: TimeInputWidget(
+                            initialSeconds: item.duration,
+                            onTimeChanged: (newDuration) =>
+                                _updateItemTime(index, newDuration),
+                            label: 'MM:SS',
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(width: 8),
-                    if (widget.block.items.length >
-                        2) // Only show delete button if more than 2 items
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-                        onPressed: () => _deleteItem(index),
-                        padding: const EdgeInsets.all(4),
-                        constraints: const BoxConstraints(
-                          minWidth: 32, // Увеличили минимальную ширину
-                          minHeight: 32, // Увеличили минимальную высоту
-                        ),
-                      ),
+                    // Резервируем место под кнопку удаления для стабильной ширины
+                    (widget.block.items.length > 2)
+                        ? IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                            onPressed: () => _deleteItem(index),
+                            padding: const EdgeInsets.all(4),
+                            constraints: const BoxConstraints(
+                              minWidth: 32, // Увеличили минимальную ширину
+                              minHeight: 32, // Увеличили минимальную высоту
+                            ),
+                          )
+                        : const SizedBox(width: 32, height: 32),
                   ],
                 ),
               );

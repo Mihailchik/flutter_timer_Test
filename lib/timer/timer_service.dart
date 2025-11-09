@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'timer_model.dart';
+import '../features/timer/infra/sound_service.dart';
 
 enum TimerStatus { stopped, running, paused }
 
@@ -24,11 +25,15 @@ class TimerService extends ChangeNotifier {
   // Длительность стартового таймера (10 секунд)
   static const int PREPARATION_TIME = 10;
 
-  // Audio player for sound effects
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  // Sound service для звуковых эффектов
+  final SoundService _soundService = SoundService();
 
   // Halfway point sound flag
   bool _halfwaySoundPlayed = false;
+  // End sound flag to avoid double-play and to trigger at 00
+  bool _endSoundPlayed = false;
+  // Second half state flag for UI highlighting
+  bool _isInSecondHalf = false;
 
   TimerService();
 
@@ -94,6 +99,7 @@ class TimerService extends ChangeNotifier {
         _currentRepeat = 0;
         _preparationCompleted = false;
         _halfwaySoundPlayed = false;
+        _endSoundPlayed = false;
         debugPrint('Set preparation time to: $_remainingTime');
       }
 
@@ -127,6 +133,7 @@ class TimerService extends ChangeNotifier {
     _remainingTime = PREPARATION_TIME;
     _preparationCompleted = false;
     _halfwaySoundPlayed = false;
+    _endSoundPlayed = false;
 
     notifyListeners();
     debugPrint('=== TimerService.reset() finished ===');
@@ -162,15 +169,38 @@ class TimerService extends ChangeNotifier {
       _remainingTime--;
       debugPrint('Decremented time to: $_remainingTime');
 
+      // Countdown signals at 3/2/1 seconds
+      if (_remainingTime == 3) {
+        debugPrint('Playing countdown sound: 3');
+        _playCountdownSound(3);
+      } else if (_remainingTime == 2) {
+        debugPrint('Playing countdown sound: 2');
+        _playCountdownSound(2);
+      } else if (_remainingTime == 1) {
+        debugPrint('Playing countdown sound: 1');
+        _playCountdownSound(1);
+      }
+
       // Play halfway sound if needed (только для основных блоков, не для подготовки)
       final currentItem = this.currentItem;
       if (_remainingTime > 0 && // Make sure we still have time
           currentItem != null &&
           !_halfwaySoundPlayed &&
+          // Only for timers longer than 30 sec
+          currentItem.duration > 30 &&
+          // Halfway computed as integer division (floor), e.g., 31 -> 15
           _remainingTime == (currentItem.duration ~/ 2)) {
         debugPrint('Playing halfway sound');
         _playHalfwaySound();
         _halfwaySoundPlayed = true;
+        _isInSecondHalf = true;
+      }
+
+      // If just reached 0, play end sound immediately (at 00)
+      if (_remainingTime == 0 && !_endSoundPlayed) {
+        debugPrint('Reached 00, playing end sound immediately');
+        _playEndSound();
+        _endSoundPlayed = true;
       }
 
       notifyListeners();
@@ -179,10 +209,11 @@ class TimerService extends ChangeNotifier {
 
     // Time is up - handle transitions
     debugPrint('Time is up, handling transition');
-    _playEndSound();
+    // End sound уже проигран на момент достижения 00
 
     // Переход к следующему элементу или блоку
     _moveToNextItem();
+    _endSoundPlayed = false; // reset for next item
     notifyListeners();
   }
 
@@ -204,6 +235,8 @@ class TimerService extends ChangeNotifier {
           _currentRepeat = 0;
           _remainingTime = firstBlock.items[0].duration;
           _halfwaySoundPlayed = false;
+          _endSoundPlayed = false;
+          _isInSecondHalf = false;
           debugPrint('Moved to first block item with duration $_remainingTime');
         }
       }
@@ -226,6 +259,8 @@ class TimerService extends ChangeNotifier {
       _currentItemIndex++;
       _remainingTime = currentBlock.items[_currentItemIndex].duration;
       _halfwaySoundPlayed = false;
+      _endSoundPlayed = false;
+      _isInSecondHalf = false;
       debugPrint('Moved to next item in block with duration $_remainingTime');
       return;
     }
@@ -237,6 +272,8 @@ class TimerService extends ChangeNotifier {
       _currentItemIndex = 0;
       _remainingTime = currentBlock.items[0].duration;
       _halfwaySoundPlayed = false;
+      _endSoundPlayed = false;
+      _isInSecondHalf = false;
       debugPrint('Moved to next repeat of block with duration $_remainingTime');
       return;
     }
@@ -252,6 +289,8 @@ class TimerService extends ChangeNotifier {
       if (nextBlock.items.isNotEmpty) {
         _remainingTime = nextBlock.items[0].duration;
         _halfwaySoundPlayed = false;
+        _endSoundPlayed = false;
+        _isInSecondHalf = false;
         debugPrint('Moved to next block with duration $_remainingTime');
       }
       return;
@@ -263,37 +302,71 @@ class TimerService extends ChangeNotifier {
     _timer?.cancel();
   }
 
-  // Play sound at halfway point
+  // Play sound at halfway point: "бииип" (средняя длительность)
   Future<void> _playHalfwaySound() async {
-    try {
-      // In a real app, we would play a sound file here
-      // For now, we'll just print to console
-      debugPrint('Halfway sound played');
-      // Example of how to play a sound:
-      // await _audioPlayer.play(AssetSource('sounds/halfway.mp3'));
-    } catch (e) {
-      debugPrint('Error playing halfway sound: $e');
-    }
+    await _soundService.playBeep(
+      durationMs: 200,
+      frequency: 440,
+      rate: 1.0,
+      volume: 0.9,
+    );
+    debugPrint('Halfway sound played (бииип)');
   }
 
-  // Play sound at end of timer block
+  // Play sound at end of timer block: "0-бииииииип" (длинный)
   Future<void> _playEndSound() async {
-    try {
-      // In a real app, we would play a sound file here
-      // For now, we'll just print to console
-      debugPrint('End sound played');
-      // Example of how to play a sound:
-      // await _audioPlayer.play(AssetSource('sounds/end.mp3'));
-    } catch (e) {
-      debugPrint('Error playing end sound: $e');
+    await _soundService.playBeep(
+      durationMs: 700,
+      frequency: 440,
+      rate: 1.0,
+      volume: 1.0,
+    );
+    debugPrint('End sound played (0-бииииииип)');
+  }
+
+  // Play sound for countdown (3/2/1) с растущей длительностью: бип/биип/бииип
+  Future<void> _playCountdownSound(int secondsLeft) async {
+    if (secondsLeft == 3) {
+      await _soundService.playBeep(
+        durationMs: 120,
+        frequency: 440,
+        rate: 1.0,
+        volume: 0.9,
+      );
+    } else if (secondsLeft == 2) {
+      await _soundService.playBeep(
+        durationMs: 180,
+        frequency: 440,
+        rate: 1.0,
+        volume: 0.9,
+      );
+    } else if (secondsLeft == 1) {
+      await _soundService.playBeep(
+        durationMs: 240,
+        frequency: 440,
+        rate: 1.0,
+        volume: 0.95,
+      );
     }
   }
 
-  // Format time as MM:SS
-  String formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  // Динамическое форматирование времени:
+  // <60 сек -> SS
+  // <60 мин -> MM:SS
+  // >=60 мин -> HH:MM:SS
+  String formatTime(int totalSeconds) {
+    if (totalSeconds < 60) {
+      return totalSeconds.toString().padLeft(2, '0');
+    }
+
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   // Get current phase for color coding
@@ -312,7 +385,10 @@ class TimerService extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
-    _audioPlayer.dispose();
+    _soundService.dispose();
     super.dispose();
   }
+
+  // Expose UI helpers
+  bool get isInSecondHalf => _isInSecondHalf;
 }

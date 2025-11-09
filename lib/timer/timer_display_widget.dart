@@ -47,18 +47,33 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             _getDisplayTitle(),
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          Text(
-            widget.timerService.formatTime(widget.timerService.remainingTime),
-            style: const TextStyle(
-              fontSize: 72,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'monospace',
+          SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
+                widget.timerService.formatTime(
+                  widget.timerService.remainingTime,
+                ),
+                style: const TextStyle(
+                  fontSize: 72,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.visible,
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -101,9 +116,20 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
       case TimerPhase.preparation:
         return Colors.yellow.shade100; // Желтый для подготовки
       case TimerPhase.pause:
-        return Colors.red.shade100; // Красный для паузы
+        // Красный для паузы, на второй половине — на тон темнее
+        final isSecondHalf = widget.timerService.isInSecondHalf;
+        final dur = widget.timerService.currentItem?.duration ?? 0;
+        if (isSecondHalf && dur > 30) {
+          return Colors.red.shade200;
+        }
+        return Colors.red.shade100;
       case TimerPhase.exercise:
-        // Зеленый для упражнения
+        // Зеленый для упражнения, на второй половине — на тон темнее
+        final isSecondHalf = widget.timerService.isInSecondHalf;
+        final dur = widget.timerService.currentItem?.duration ?? 0;
+        if (isSecondHalf && dur > 30) {
+          return Colors.green.shade200;
+        }
         return Colors.green.shade100;
     }
   }
@@ -111,7 +137,7 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
   String _getDisplayTitle() {
     switch (widget.timerService.currentPhase) {
       case TimerPhase.preparation:
-        return 'Приготовьтесь';
+        return 'приготовиться';
       case TimerPhase.pause:
         final currentItem = widget.timerService.currentItem;
         return currentItem?.name ?? 'Отдых';
