@@ -3,5 +3,7 @@
 /*
 # Keep .gitignore itself
 !.gitignore
+# Keep pubspec for dependencies
+!pubspec.yaml
 # Keep lib sources
 !lib/
