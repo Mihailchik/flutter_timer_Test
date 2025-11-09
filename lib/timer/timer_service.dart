@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'timer_model.dart';
@@ -26,9 +30,12 @@ class TimerService extends ChangeNotifier {
 
   // Audio player for sound effects
   final AudioPlayer _audioPlayer = AudioPlayer();
+  String? _beepFilePath; // Generated beep wav file path (mobile/desktop)
 
   // Halfway point sound flag
   bool _halfwaySoundPlayed = false;
+  // End sound flag to avoid double-play and to trigger at 00
+  bool _endSoundPlayed = false;
   // Second half state flag for UI highlighting
   bool _isInSecondHalf = false;
 
@@ -96,6 +103,7 @@ class TimerService extends ChangeNotifier {
         _currentRepeat = 0;
         _preparationCompleted = false;
         _halfwaySoundPlayed = false;
+        _endSoundPlayed = false;
         debugPrint('Set preparation time to: $_remainingTime');
       }
 
@@ -129,6 +137,7 @@ class TimerService extends ChangeNotifier {
     _remainingTime = PREPARATION_TIME;
     _preparationCompleted = false;
     _halfwaySoundPlayed = false;
+    _endSoundPlayed = false;
 
     notifyListeners();
     debugPrint('=== TimerService.reset() finished ===');
@@ -191,16 +200,24 @@ class TimerService extends ChangeNotifier {
         _isInSecondHalf = true;
       }
 
+      // If just reached 0, play end sound immediately (at 00)
+      if (_remainingTime == 0 && !_endSoundPlayed) {
+        debugPrint('Reached 00, playing end sound immediately');
+        _playEndSound();
+        _endSoundPlayed = true;
+      }
+
       notifyListeners();
       return;
     }
 
     // Time is up - handle transitions
     debugPrint('Time is up, handling transition');
-    _playEndSound();
+    // End sound уже проигран на момент достижения 00
 
     // Переход к следующему элементу или блоку
     _moveToNextItem();
+    _endSoundPlayed = false; // reset for next item
     notifyListeners();
   }
 
@@ -222,6 +239,7 @@ class TimerService extends ChangeNotifier {
           _currentRepeat = 0;
           _remainingTime = firstBlock.items[0].duration;
           _halfwaySoundPlayed = false;
+          _endSoundPlayed = false;
           _isInSecondHalf = false;
           debugPrint('Moved to first block item with duration $_remainingTime');
         }
@@ -245,6 +263,7 @@ class TimerService extends ChangeNotifier {
       _currentItemIndex++;
       _remainingTime = currentBlock.items[_currentItemIndex].duration;
       _halfwaySoundPlayed = false;
+      _endSoundPlayed = false;
       _isInSecondHalf = false;
       debugPrint('Moved to next item in block with duration $_remainingTime');
       return;
@@ -257,6 +276,7 @@ class TimerService extends ChangeNotifier {
       _currentItemIndex = 0;
       _remainingTime = currentBlock.items[0].duration;
       _halfwaySoundPlayed = false;
+      _endSoundPlayed = false;
       _isInSecondHalf = false;
       debugPrint('Moved to next repeat of block with duration $_remainingTime');
       return;
@@ -273,6 +293,7 @@ class TimerService extends ChangeNotifier {
       if (nextBlock.items.isNotEmpty) {
         _remainingTime = nextBlock.items[0].duration;
         _halfwaySoundPlayed = false;
+        _endSoundPlayed = false;
         _isInSecondHalf = false;
         debugPrint('Moved to next block with duration $_remainingTime');
       }
@@ -285,48 +306,166 @@ class TimerService extends ChangeNotifier {
     _timer?.cancel();
   }
 
-  // Play sound at halfway point (single beep asset with medium pitch)
+  // Play sound at halfway point: "бииип" (средняя длительность)
   Future<void> _playHalfwaySound() async {
-    await _playBeep(rate: 1.2, volume: 0.7);
-    debugPrint('Halfway sound played');
+    await _playBeep(durationMs: 200, frequency: 440, rate: 1.0, volume: 0.9);
+    debugPrint('Halfway sound played (бииип)');
   }
 
-  // Play sound at end of timer block (single beep asset with highest pitch)
+  // Play sound at end of timer block: "0-бииииииип" (длинный)
   Future<void> _playEndSound() async {
-    await _playBeep(rate: 1.6, volume: 1.0);
-    debugPrint('End sound played');
+    await _playBeep(durationMs: 700, frequency: 440, rate: 1.0, volume: 1.0);
+    debugPrint('End sound played (0-бииииииип)');
   }
 
-  // Play sound for countdown (3/2/1) with increasing pitch using single asset
+  // Play sound for countdown (3/2/1) с растущей длительностью: бип/биип/бииип
   Future<void> _playCountdownSound(int secondsLeft) async {
-    double rate = 1.0;
-    double volume = 0.6;
     if (secondsLeft == 3) {
-      rate = 1.0; // низкая тональность
-      volume = 0.6;
+      await _playBeep(durationMs: 120, frequency: 440, rate: 1.0, volume: 0.9);
     } else if (secondsLeft == 2) {
-      rate = 1.2; // средняя тональность
-      volume = 0.7;
+      await _playBeep(durationMs: 180, frequency: 440, rate: 1.0, volume: 0.9);
     } else if (secondsLeft == 1) {
-      rate = 1.4; // высокая тональность
-      volume = 0.8;
+      await _playBeep(durationMs: 240, frequency: 440, rate: 1.0, volume: 0.95);
     }
-    await _playBeep(rate: rate, volume: volume);
   }
 
-  // Unified beep player using single asset and variable playback rate
-  Future<void> _playBeep({double rate = 1.0, double volume = 0.8}) async {
+  // Unified beep player: generate short WAV with requested duration/frequency
+  Future<void> _playBeep({
+    int durationMs = 200,
+    double frequency = 440,
+    double rate = 1.0,
+    double volume = 0.9,
+  }) async {
     try {
       await _audioPlayer.setVolume(volume);
+
+      // Try to set playback rate (not always supported, esp. web)
       try {
         await _audioPlayer.setPlaybackRate(rate);
       } catch (e) {
         debugPrint('Playback rate not supported on this platform: $e');
       }
-      await _audioPlayer.play(AssetSource('sounds/beep.mp3'));
+
+      // Web: play data URL WAV inline (no filesystem)
+      if (kIsWeb) {
+        final dataUrl = _generateBeepDataUrl(
+          durationMs: durationMs,
+          frequency: frequency,
+          amplitude: 0.9,
+        );
+        debugPrint('Playing web data URL beep');
+        await _audioPlayer.play(UrlSource(dataUrl));
+        return;
+      }
+
+      // Non-web: generate WAV file per request and play
+      final path = await _writeBeepWavFile(
+        durationMs: durationMs,
+        frequency: frequency,
+        amplitude: 0.9,
+      );
+      debugPrint('Playing generated beep WAV: $path');
+      await _audioPlayer.play(DeviceFileSource(path));
     } catch (e) {
       debugPrint('Error playing beep: $e');
     }
+  }
+
+  // Generate requested beep WAV file and return its path (non-web)
+  Future<String> _writeBeepWavFile({
+    required int durationMs,
+    required double frequency,
+    required double amplitude,
+  }) async {
+    // Create temp file path (overwrite each time)
+    final tempDir = Directory.systemTemp;
+    final file = File('${tempDir.path}/flutter_timer_beep.wav');
+
+    final sampleRate = 44100;
+    final totalSamples = (sampleRate * durationMs / 1000).round();
+    final bytes = _generateWavBytes(
+      totalSamples: totalSamples,
+      sampleRate: sampleRate,
+      amplitude: amplitude,
+      frequency: frequency,
+    );
+    await file.writeAsBytes(bytes, flush: true);
+    _beepFilePath = file.path;
+    debugPrint('Generated beep WAV at: ${file.path}');
+    return _beepFilePath!;
+  }
+
+  // Generate WAV bytes with simple sinusoidal PCM data
+  List<int> _generateWavBytes({
+    required int totalSamples,
+    required int sampleRate,
+    required double amplitude,
+    required double frequency,
+  }) {
+    // PCM 16-bit mono
+    final data = BytesBuilder();
+    for (int i = 0; i < totalSamples; i++) {
+      final t = i / sampleRate;
+      final sample = (amplitude * sin(2 * pi * frequency * t));
+      // 16-bit signed
+      int s = (sample * 32767).round();
+      // little-endian
+      data.add([s & 0xFF, (s >> 8) & 0xFF]);
+    }
+
+    final pcm = data.toBytes();
+    final byteRate = sampleRate * 2; // mono 16-bit
+    final blockAlign = 2; // mono 16-bit
+    final subchunk2Size = pcm.length;
+    final chunkSize = 36 + subchunk2Size;
+
+    // Build WAV header (RIFF)
+    final header = BytesBuilder();
+    // ChunkID 'RIFF'
+    header.add('RIFF'.codeUnits);
+    header.add(_le32(chunkSize));
+    // Format 'WAVE'
+    header.add('WAVE'.codeUnits);
+    // Subchunk1ID 'fmt '
+    header.add('fmt '.codeUnits);
+    header.add(_le32(16)); // Subchunk1Size (PCM)
+    header.add(_le16(1)); // AudioFormat PCM
+    header.add(_le16(1)); // NumChannels mono
+    header.add(_le32(sampleRate));
+    header.add(_le32(byteRate));
+    header.add(_le16(blockAlign));
+    header.add(_le16(16)); // BitsPerSample
+    // Subchunk2ID 'data'
+    header.add('data'.codeUnits);
+    header.add(_le32(subchunk2Size));
+
+    return [...header.toBytes(), ...pcm];
+  }
+
+  List<int> _le16(int value) => [value & 0xFF, (value >> 8) & 0xFF];
+  List<int> _le32(int value) => [
+    value & 0xFF,
+    (value >> 8) & 0xFF,
+    (value >> 16) & 0xFF,
+    (value >> 24) & 0xFF,
+  ];
+
+  // Build data URL for WAV (for web playback)
+  String _generateBeepDataUrl({
+    required int durationMs,
+    required double frequency,
+    required double amplitude,
+  }) {
+    final sampleRate = 44100;
+    final totalSamples = (sampleRate * durationMs / 1000).round();
+    final bytes = _generateWavBytes(
+      totalSamples: totalSamples,
+      sampleRate: sampleRate,
+      amplitude: amplitude,
+      frequency: frequency,
+    );
+    final b64 = base64Encode(bytes);
+    return 'data:audio/wav;base64,$b64';
   }
 
   // Динамическое форматирование времени:
