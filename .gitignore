@@ -7,3 +7,7 @@
 !pubspec.yaml
 # Keep lib sources
 !lib/
+# Keep documentation and screenshots
+!README.md
+!HELP.md
+!docs/
