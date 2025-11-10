@@ -312,7 +312,7 @@ class TimerService extends ChangeNotifier {
       rate: 1.0,
       volume: 0.9,
     );
-    debugPrint('Halfway sound played (бииип)');
+    debugPrint('Halfway sound played (beep)');
   }
 
   // Play sound at end of timer block: "0-бииииииип" (длинный)
@@ -323,7 +323,7 @@ class TimerService extends ChangeNotifier {
       rate: 1.0,
       volume: 1.0,
     );
-    debugPrint('End sound played (0-бииииииип)');
+    debugPrint('End sound played (0-beeeeeep)');
   }
 
   // Play sound for countdown (3/2/1) с растущей длительностью: бип/биип/бииип

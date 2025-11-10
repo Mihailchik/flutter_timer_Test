@@ -93,19 +93,19 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
       if (widget.timerService.currentBlock != null &&
           widget.timerService.currentBlock!.repeats > 1)
         Text(
-          'Повтор ${widget.timerService.currentRepeat + 1} из ${widget.timerService.currentBlock?.repeats ?? 1}',
+          'Repeat ${widget.timerService.currentRepeat + 1} of ${widget.timerService.currentBlock?.repeats ?? 1}',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
       const SizedBox(height: 10),
       Text(
-        'Блок ${widget.timerService.currentBlockIndex + 1} из ${widget.timerService.sequence?.blocks.length ?? 1}',
+        'Block ${widget.timerService.currentBlockIndex + 1} of ${widget.timerService.sequence?.blocks.length ?? 1}',
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
       ),
       const SizedBox(height: 10),
       if (widget.timerService.currentBlock != null &&
           widget.timerService.currentItem != null)
         Text(
-          'Таймер ${widget.timerService.currentItemIndex + 1} из ${widget.timerService.currentBlock?.items.length ?? 1}',
+          'Timer ${widget.timerService.currentItemIndex + 1} of ${widget.timerService.currentBlock?.items.length ?? 1}',
           style: const TextStyle(fontSize: 16),
         ),
     ];
@@ -137,13 +137,13 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
   String _getDisplayTitle() {
     switch (widget.timerService.currentPhase) {
       case TimerPhase.preparation:
-        return 'приготовиться';
+        return 'Get ready';
       case TimerPhase.pause:
         final currentItem = widget.timerService.currentItem;
-        return currentItem?.name ?? 'Отдых';
+        return currentItem?.name ?? 'Rest';
       case TimerPhase.exercise:
         final currentItem = widget.timerService.currentItem;
-        return currentItem?.name ?? 'Упражнение';
+        return currentItem?.name ?? 'Exercise';
     }
   }
 }

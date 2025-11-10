@@ -35,10 +35,10 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
         blocks: [
           ..._sequence.blocks,
           TimerBlock(
-            name: 'Блок ${_sequence.blocks.length + 1}',
+            name: 'Block ${_sequence.blocks.length + 1}',
             items: [
-              TimerItem(name: 'Упражнение', duration: 30, isPause: false),
-              TimerItem(name: 'Пауза', duration: 15, isPause: true),
+              TimerItem(name: 'Exercise', duration: 30, isPause: false),
+              TimerItem(name: 'Rest', duration: 15, isPause: true),
             ],
             repeats: 1,
           ),
@@ -83,7 +83,7 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
           children: [
             Expanded(
               child: Text(
-                'Настройка таймера',
+                'Timer Setup',
                 style: TextStyle(
                   fontSize: isNarrow ? 18 : 20,
                   fontWeight: FontWeight.bold,
@@ -96,13 +96,13 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
                 ? IconButton(
                     onPressed: _addBlock,
                     icon: const Icon(Icons.timer),
-                    tooltip: 'Добавить блок',
+                    tooltip: 'Add block',
                   )
                 : ElevatedButton.icon(
                     onPressed: _addBlock,
                     icon: Icon(isNarrow ? Icons.timer : Icons.add, size: 18),
                     label: Text(
-                      isNarrow ? 'Добавить' : 'Добавить блок',
+                      isNarrow ? 'Add' : 'Add block',
                       style: const TextStyle(fontSize: 14),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -116,12 +116,12 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
         ),
         SizedBox(height: isNarrow ? 12 : 20),
         const Text(
-          'Блоки таймера:',
+          'Timer blocks:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: isNarrow ? 8 : 10),
         if (_sequence.blocks.isEmpty)
-          const Center(child: Text('Нет блоков. Добавьте блок для начала.'))
+          const Center(child: Text('No blocks. Add a block to get started.'))
         else
           Expanded(
             child: SingleChildScrollView(
