@@ -15,6 +15,16 @@
 - Начальный экран (настройка): ![Setup Screen](docs/screenshot-setup.png)
 - Экран работы таймера: ![Running Screen](docs/screenshot-running.png)
 
+### Android (эмуляторы)
+
+- `emulator-5556` (sdk gphone64 arm64)
+  - Начальный экран: ![Android Setup 5556](docs/screenshot-android-setup-5556.png)
+  - Работа таймера: ![Android Running 5556](docs/screenshot-android-running-5556.png)
+
+- `emulator-5554` (sdk gphone64 arm64)
+  - Начальный экран: ![Android Setup 5554](docs/screenshot-android-setup-5554.png)
+  - Работа таймера: ![Android Running 5554](docs/screenshot-android-running-5554.png)
+
 ## Быстрый старт (универсально)
 1) Установите Flutter SDK для вашей платформы.
 2) В пустом каталоге выполните: `flutter create .` — это создаст платформенные файлы.

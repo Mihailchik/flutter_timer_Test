@@ -49,7 +49,9 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
   }
 
   void _deleteBlock(int index) {
-    if (_sequence.blocks.length <= 1) return;
+    if (_sequence.blocks.length <= 1) {
+      return;
+    }
 
     setState(() {
       final newBlocks = List<TimerBlock>.from(_sequence.blocks);
@@ -70,38 +72,50 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isNarrow = size.width < 360;
+    final isVeryNarrow = size.width < 320;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Настройка таймера',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            ElevatedButton.icon(
-              onPressed: _addBlock,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text(
-                'Добавить блок',
-                style: TextStyle(fontSize: 14),
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+              style: TextStyle(
+                fontSize: isNarrow ? 18 : 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
+            isVeryNarrow
+                ? IconButton(
+                    onPressed: _addBlock,
+                    icon: const Icon(Icons.add),
+                    tooltip: 'Добавить блок',
+                  )
+                : ElevatedButton.icon(
+                    onPressed: _addBlock,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(
+                      isNarrow ? 'Добавить' : 'Добавить блок',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isNarrow ? 10 : 12,
+                        vertical: isNarrow ? 6 : 8,
+                      ),
+                    ),
+                  ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isNarrow ? 12 : 20),
         const Text(
           'Блоки таймера:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: isNarrow ? 8 : 10),
         if (_sequence.blocks.isEmpty)
           const Center(child: Text('Нет блоков. Добавьте блок для начала.'))
         else

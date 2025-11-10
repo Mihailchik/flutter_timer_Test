@@ -6,7 +6,6 @@ import 'beep_generator.dart';
 
 class SoundService {
   final AudioPlayer _audio = AudioPlayer();
-  String? _lastTempFilePath;
 
   Future<void> playBeep({
     int durationMs = 200,
@@ -33,7 +32,7 @@ class SoundService {
       }
 
       // Non-web: генерируем WAV и играем из временного файла
-      final sampleRate = 44100;
+      const sampleRate = 44100;
       final totalSamples = (sampleRate * durationMs / 1000).round();
       final bytes = BeepGenerator.generateWavBytes(
         totalSamples: totalSamples,
@@ -44,7 +43,6 @@ class SoundService {
       final tempDir = Directory.systemTemp;
       final file = File('${tempDir.path}/flutter_timer_beep.wav');
       await file.writeAsBytes(bytes, flush: true);
-      _lastTempFilePath = file.path;
       await _audio.play(DeviceFileSource(file.path));
     } catch (e) {
       // Логирование оставляем вызывающему коду (через debugPrint)
@@ -55,4 +53,3 @@ class SoundService {
     _audio.dispose();
   }
 }
-

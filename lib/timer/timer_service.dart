@@ -23,7 +23,7 @@ class TimerService extends ChangeNotifier {
   bool _preparationCompleted = false;
 
   // Длительность стартового таймера (10 секунд)
-  static const int PREPARATION_TIME = 10;
+  static const int preparationTime = 10;
 
   // Sound service для звуковых эффектов
   final SoundService _soundService = SoundService();
@@ -93,7 +93,7 @@ class TimerService extends ChangeNotifier {
       if (_status == TimerStatus.stopped) {
         debugPrint('Initializing timer from stopped state');
         // Начинаем со стартового таймера
-        _remainingTime = PREPARATION_TIME;
+        _remainingTime = preparationTime;
         _currentBlockIndex = 0;
         _currentItemIndex = 0;
         _currentRepeat = 0;
@@ -130,7 +130,7 @@ class TimerService extends ChangeNotifier {
     _currentBlockIndex = 0;
     _currentItemIndex = 0;
     _currentRepeat = 0;
-    _remainingTime = PREPARATION_TIME;
+    _remainingTime = preparationTime;
     _preparationCompleted = false;
     _halfwaySoundPlayed = false;
     _endSoundPlayed = false;
@@ -182,8 +182,10 @@ class TimerService extends ChangeNotifier {
       }
 
       // Play halfway sound if needed (только для основных блоков, не для подготовки)
+      // Исключаем фазу подготовки — половинный сигнал не должен звучать на ней
       final currentItem = this.currentItem;
-      if (_remainingTime > 0 && // Make sure we still have time
+      if (_preparationCompleted &&
+          _remainingTime > 0 && // Make sure we still have time
           currentItem != null &&
           !_halfwaySoundPlayed &&
           // Only for timers longer than 30 sec

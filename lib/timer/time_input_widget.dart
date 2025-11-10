@@ -133,96 +133,104 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160, // Увеличили ширину для лучшего размещения
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              decoration: InputDecoration(
-                labelText: widget.label,
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 12, // Увеличили вертикальный padding
-                ),
-              ),
-              style: const TextStyle(fontSize: 14), // Увеличили размер шрифта
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9:]+')),
-              ],
-              onChanged: (value) {
-                // Обработка изменений в реальном времени
-                if (!_isFormatting) {
-                  final parsedTime = _parseTime(value);
-                  widget.onTimeChanged(parsedTime);
-                }
-              },
-              onTapOutside: (event) {
-                // Форматируем значение при клике вне поля
-                _focusNode.unfocus();
-                final parsedTime = _parseTime(_controller.text);
-                _formatAndSetTime(parsedTime);
-                _lastFormattedValue = _controller.text;
-                widget.onTimeChanged(parsedTime);
-              },
-              onEditingComplete: () {
-                // При завершении редактирования форматируем значение
-                final parsedTime = _parseTime(_controller.text);
-                _isFormatting = true;
-                _formatAndSetTime(parsedTime);
-                _lastFormattedValue = _controller.text;
-                _isFormatting = false;
-                widget.onTimeChanged(parsedTime);
-                _focusNode.unfocus();
-              },
+    final compact = MediaQuery.of(context).size.width < 360;
+    final inputPadding = EdgeInsets.symmetric(
+      horizontal: compact ? 6 : 8,
+      vertical: compact ? 6 : 12,
+    );
+
+    final textStyle = TextStyle(fontSize: compact ? 12 : 14);
+    final spacerWidth = compact ? 6.0 : 8.0;
+    final btnSize = compact ? 24.0 : 32.0;
+    final iconSize = compact ? 20.0 : 24.0;
+    final betweenBtns = compact ? 2.0 : 4.0;
+
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            decoration: InputDecoration(
+              labelText: widget.label,
+              border: const OutlineInputBorder(),
+              contentPadding: inputPadding,
             ),
-          ),
-          const SizedBox(width: 8), // Увеличили расстояние
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Увеличенные кнопки со стрелками
-              SizedBox(
-                width: 32, // Увеличили ширину
-                height: 32, // Увеличили высоту
-                child: ElevatedButton(
-                  onPressed: () => _increaseTime(5),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(0),
-                    shape: const CircleBorder(),
-                    minimumSize: const Size(32, 32),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_drop_up,
-                    size: 24,
-                  ), // Увеличили размер иконки
-                ),
-              ),
-              const SizedBox(height: 4), // Увеличили расстояние между кнопками
-              SizedBox(
-                width: 32, // Увеличили ширину
-                height: 32, // Увеличили высоту
-                child: ElevatedButton(
-                  onPressed: () => _decreaseTime(5),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(0),
-                    shape: const CircleBorder(),
-                    minimumSize: const Size(32, 32),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_drop_down,
-                    size: 24,
-                  ), // Увеличили размер иконки
-                ),
-              ),
+            style: textStyle,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9:]+')),
             ],
+            onChanged: (value) {
+              if (!_isFormatting) {
+                final parsedTime = _parseTime(value);
+                widget.onTimeChanged(parsedTime);
+              }
+            },
+            onTapOutside: (event) {
+              _focusNode.unfocus();
+              final parsedTime = _parseTime(_controller.text);
+              _formatAndSetTime(parsedTime);
+              _lastFormattedValue = _controller.text;
+              widget.onTimeChanged(parsedTime);
+            },
+            onEditingComplete: () {
+              final parsedTime = _parseTime(_controller.text);
+              _isFormatting = true;
+              _formatAndSetTime(parsedTime);
+              _lastFormattedValue = _controller.text;
+              _isFormatting = false;
+              widget.onTimeChanged(parsedTime);
+              _focusNode.unfocus();
+            },
           ),
-        ],
-      ),
+        ),
+        SizedBox(width: spacerWidth),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: btnSize,
+              height: btnSize,
+              child: ElevatedButton(
+                onPressed: () => _increaseTime(5),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(0),
+                  shape: const CircleBorder(),
+                  minimumSize: Size(btnSize, btnSize),
+                  visualDensity: compact
+                      ? VisualDensity(horizontal: -2, vertical: -2)
+                      : VisualDensity.standard,
+                ),
+                child: Icon(
+                  Icons.arrow_drop_up,
+                  size: iconSize,
+                ),
+              ),
+            ),
+            SizedBox(height: betweenBtns),
+            SizedBox(
+              width: btnSize,
+              height: btnSize,
+              child: ElevatedButton(
+                onPressed: () => _decreaseTime(5),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(0),
+                  shape: const CircleBorder(),
+                  minimumSize: Size(btnSize, btnSize),
+                  visualDensity: compact
+                      ? VisualDensity(horizontal: -2, vertical: -2)
+                      : VisualDensity.standard,
+                ),
+                child: Icon(
+                  Icons.arrow_drop_down,
+                  size: iconSize,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

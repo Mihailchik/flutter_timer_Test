@@ -20,7 +20,7 @@ class BeepGenerator {
 
     final pcm = data.toBytes();
     final byteRate = sampleRate * 2; // mono 16-bit
-    final blockAlign = 2; // mono 16-bit
+    const blockAlign = 2; // mono 16-bit
     final subchunk2Size = pcm.length;
     final int chunkSize = 36 + subchunk2Size;
 
