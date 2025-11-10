@@ -1,52 +1,63 @@
-# Flutter Timer (source-only, cross‑platform)
+# FitTimer — simple interval training timer
 
-Минимальный таймер интервальных тренировок в формате «source‑only»:
-в репозитории хранятся только исходники `lib/` и файл зависимостей `pubspec.yaml`.
-Платформенная обвязка (`android/`, `ios/`, `web/`, `windows/`, `macos/`, `linux/`)
-создаётся пользователем под нужную платформу.
+A minimal cross‑platform interval training timer built with Flutter.
+This repository contains a standard Flutter project with app sources and platform files.
+
+## Features
+- Configure a sequence of blocks and items (exercise/rest)
+- 10‑second preparation countdown
+- Audio cues: 3‑2‑1 countdown, finish, and mid‑point of long intervals
+- Material UI with Material 3 support
+
+## Screenshots
+- Setup screen: ![Setup Screen](docs/screenshot-setup.png)
+
+## Quick Start
+- Install Flutter SDK.
+- Run `flutter pub get`.
+- List devices: `flutter devices` and start: `flutter run -d <deviceId>`.
+
+## Audio
+Uses `audioplayers` and generated WAV for playback.
+On web, audio may require a user gesture due to autoplay policies.
+
+## Structure
+- `lib/` — app sources (pages, timer logic, audio)
+- `pubspec.yaml` — dependencies and metadata
+- `docs/` — screenshots and documentation
+
+## Help
+Common platform‑specific notes and troubleshooting are in `HELP.md`.
+
+---
+
+# FitTimer — простой таймер интервальных тренировок (русская версия)
+
+Минимальный кроссплатформенный таймер интервальных тренировок на Flutter.
+Репозиторий содержит стандартный Flutter‑проект с исходниками приложения и платформенными файлами.
 
 ## Возможности
 - Настройка последовательности блоков и элементов (упражнение/пауза)
-- Подготовительный таймер (10 секунд)
-- Звуковые сигналы: обратный отсчёт 3–2–1, завершение, половина длинных интервалов
+- Подготовительный отсчёт 10 секунд
+- Звуковые сигналы: обратный отсчёт 3–2–1, завершение и середина длинных интервалов
 - Материальный интерфейс, поддержка Material 3
 
-## Скриншоты
-- Начальный экран (настройка): ![Setup Screen](docs/screenshot-setup.png)
-- Экран работы таймера: ![Running Screen](docs/screenshot-running.png)
+## Скриншот
+- Начальный экран: ![Начальный экран](docs/screenshot-setup.png)
 
-### Android (эмуляторы)
-
-- `emulator-5556` (sdk gphone64 arm64)
-  - Начальный экран: ![Android Setup 5556](docs/screenshot-android-setup-5556.png)
-  - Работа таймера: ![Android Running 5556](docs/screenshot-android-running-5556.png)
-
-- `emulator-5554` (sdk gphone64 arm64)
-  - Начальный экран: ![Android Setup 5554](docs/screenshot-android-setup-5554.png)
-  - Работа таймера: ![Android Running 5554](docs/screenshot-android-running-5554.png)
-
-## Быстрый старт (универсально)
-1) Установите Flutter SDK для вашей платформы.
-2) В пустом каталоге выполните: `flutter create .` — это создаст платформенные файлы.
-3) Замените созданные `lib/` и `pubspec.yaml` на файлы из этого репозитория.
-4) Установите зависимости: `flutter pub get`.
-5) Выберите устройство: `flutter devices`, затем запустите: `flutter run -d <deviceId>`.
-
-Примеры устройств:
-- Android эмулятор/устройство: `emulator-5554`, `RF8Nxxxxx`
-- iOS симулятор/устройство: `apple_ios_simulator`, `iPhone-XX`
-- Web: `chrome`
-- Desktop: `macos`, `windows`, `linux` (предварительно включите через `flutter config`)
+## Быстрый старт
+- Установите Flutter SDK.
+- Выполните `flutter pub get`.
+- Посмотрите устройства: `flutter devices` и запустите: `flutter run -d <deviceId>`.
 
 ## Звук
-Используется `audioplayers` и генерация WAV (`lib/features/timer/infra/beep_generator.dart`).
-На web воспроизведение через data URL; на мобильных и десктопах — временный WAV‑файл.
-Политики автоплея в браузерах могут требовать пользовательское действие перед воспроизведением.
+Используется `audioplayers` и генерация WAV. На web воспроизведение может требовать
+пользовательское действие из‑за политик автоплея.
 
 ## Структура
 - `lib/` — исходники приложения (страницы, логика таймера, звук)
 - `pubspec.yaml` — зависимости и метаданные
 - `docs/` — скриншоты и документация
 
-## Поддержка и помощь
-Платформо‑специфичные замечания и решения типовых проблем вынесены в `HELP.md`.
+## Помощь
+Замечания по платформам и типичные решения — в `HELP.md`.
