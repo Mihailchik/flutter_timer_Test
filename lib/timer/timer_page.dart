@@ -7,7 +7,7 @@ import 'timer_display_widget.dart';
 import 'timer_controls_widget.dart';
 
 class TimerPage extends StatefulWidget {
-  const TimerPage({Key? key}) : super(key: key);
+  const TimerPage({super.key});
 
   @override
   State<TimerPage> createState() => _TimerPageState();
@@ -39,18 +39,6 @@ class _TimerPageState extends State<TimerPage> {
     _timerService.setSequence(_sequence);
     // Добавляем слушатель изменений таймера
     _timerService.addListener(_onTimerChanged);
-
-    // В debug-режиме автоматически запускаем таймер с небольшой задержкой,
-    // чтобы можно было сделать скриншот стартового экрана.
-    if (!kReleaseMode) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted && _timerService.status == TimerStatus.stopped) {
-            _startTimer();
-          }
-        });
-      });
-    }
   }
 
   @override
@@ -93,6 +81,7 @@ class _TimerPageState extends State<TimerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final compactHeight = MediaQuery.of(context).size.height < 600;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Таймер интервальных тренировок'),
@@ -159,7 +148,7 @@ class _TimerPageState extends State<TimerPage> {
                         flex: 3,
                         child: TimerDisplayWidget(timerService: _timerService),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: compactHeight ? 12 : 20),
                       TimerControlsWidget(
                         timerService: _timerService,
                         onStart: _startTimer,

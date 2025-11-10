@@ -17,6 +17,8 @@ class TimerControlsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final compact = size.width < 360 || size.height < 600;
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: const BoxDecoration(
@@ -33,12 +35,12 @@ class TimerControlsWidget extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 shape: const CircleBorder(),
                 backgroundColor: Colors.green,
-                fixedSize: const Size(72, 72),
+                fixedSize: Size(compact ? 44 : 72, compact ? 44 : 72),
                 alignment: Alignment.center,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.play_arrow,
-                size: 36,
+                size: compact ? 28 : 36,
                 color: Colors.white,
               ),
             ),
@@ -49,10 +51,11 @@ class TimerControlsWidget extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 shape: const CircleBorder(),
                 backgroundColor: Colors.orange,
-                fixedSize: const Size(72, 72),
+                fixedSize: Size(compact ? 44 : 72, compact ? 44 : 72),
                 alignment: Alignment.center,
               ),
-              child: const Icon(Icons.pause, size: 36, color: Colors.white),
+              child: Icon(Icons.pause,
+                  size: compact ? 28 : 36, color: Colors.white),
             ),
           ElevatedButton(
             onPressed: onReset,
@@ -60,10 +63,11 @@ class TimerControlsWidget extends StatelessWidget {
               padding: EdgeInsets.zero,
               shape: const CircleBorder(),
               backgroundColor: Colors.red,
-              fixedSize: const Size(72, 72),
+              fixedSize: Size(compact ? 44 : 72, compact ? 44 : 72),
               alignment: Alignment.center,
             ),
-            child: const Icon(Icons.stop, size: 36, color: Colors.white),
+            child:
+                Icon(Icons.stop, size: compact ? 28 : 36, color: Colors.white),
           ),
         ],
       ),

@@ -124,8 +124,10 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
   }
 
   void _deleteItem(int index) {
-    if (widget.block.items.length <= 2)
-      return; // Keep at least 2 items (1 exercise + 1 pause)
+    if (widget.block.items.length <= 2) {
+      // Keep at least 2 items (1 exercise + 1 pause)
+      return;
+    }
 
     setState(() {
       // Remove controller for the deleted item
@@ -177,6 +179,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.of(context).size.width < 360;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       child: Padding(
@@ -202,18 +205,18 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                               vertical: 8,
                             ),
                           ),
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: compact ? 12 : 14),
                           onChanged: (value) => _updateBlock(),
                         ),
                       ),
                       const SizedBox(width: 8),
                       // Поле повторов с кнопками
                       SizedBox(
-                        width: 140,
+                        width: compact ? 110 : 140,
                         child: Row(
                           children: [
                             SizedBox(
-                              width: 70,
+                              width: compact ? 56 : 70,
                               child: TextField(
                                 controller: _repeatsController,
                                 keyboardType: TextInputType.number,
@@ -222,10 +225,10 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(
                                     horizontal: 8,
-                                    vertical: 12,
+                                    vertical: 10,
                                   ),
                                 ),
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: compact ? 12 : 14),
                                 onChanged: (value) => _updateBlock(),
                               ),
                             ),
@@ -234,35 +237,49 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 SizedBox(
-                                  width: 32,
-                                  height: 32,
+                                  width: compact ? 24 : 32,
+                                  height: compact ? 24 : 32,
                                   child: ElevatedButton(
                                     onPressed: _increaseRepeats,
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.all(0),
                                       shape: const CircleBorder(),
-                                      minimumSize: const Size(32, 32),
+                                      minimumSize: Size(
+                                        compact ? 24 : 32,
+                                        compact ? 24 : 32,
+                                      ),
+                                      visualDensity: compact
+                                          ? const VisualDensity(
+                                              horizontal: -2, vertical: -2)
+                                          : VisualDensity.standard,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.arrow_drop_up,
-                                      size: 24,
+                                      size: compact ? 20 : 24,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: compact ? 2 : 4),
                                 SizedBox(
-                                  width: 32,
-                                  height: 32,
+                                  width: compact ? 24 : 32,
+                                  height: compact ? 24 : 32,
                                   child: ElevatedButton(
                                     onPressed: _decreaseRepeats,
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.all(0),
                                       shape: const CircleBorder(),
-                                      minimumSize: const Size(32, 32),
+                                      minimumSize: Size(
+                                        compact ? 24 : 32,
+                                        compact ? 24 : 32,
+                                      ),
+                                      visualDensity: compact
+                                          ? const VisualDensity(
+                                              horizontal: -2, vertical: -2)
+                                          : VisualDensity.standard,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.arrow_drop_down,
-                                      size: 24,
+                                      size: compact ? 20 : 24,
                                     ),
                                   ),
                                 ),
@@ -342,9 +359,11 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                     Builder(
                       builder: (context) {
                         final screenWidth = MediaQuery.of(context).size.width;
-                        double timeWidth =
-                            (screenWidth - 32) * 0.28; // доля ширины
-                        timeWidth = timeWidth.clamp(140.0, 200.0);
+                        final isCompact = screenWidth < 360;
+                        double timeWidth = (screenWidth - 32) * 0.28;
+                        timeWidth = isCompact
+                            ? timeWidth.clamp(100.0, 160.0)
+                            : timeWidth.clamp(140.0, 200.0);
                         return SizedBox(
                           width: timeWidth,
                           child: TimeInputWidget(
@@ -384,14 +403,21 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                   onPressed: _addItem,
                   icon: const Icon(
                     Icons.add,
-                    size: 20,
+                    size: 18,
                   ), // Увеличили размер иконки
-                  label: const Text('Добавить таймер'),
+                  label: Text(
+                    'Добавить таймер',
+                    style: TextStyle(fontSize: compact ? 12 : 14),
+                  ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ), // Увеличили padding
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 8 : 12,
+                      vertical: compact ? 4 : 8,
+                    ),
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity:
+                        compact ? const VisualDensity(horizontal: -2, vertical: -2) : VisualDensity.standard,
                   ),
                 ),
               ],
