@@ -81,22 +81,26 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Настройка таймера',
-              style: TextStyle(
-                fontSize: isNarrow ? 18 : 20,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                'Настройка таймера',
+                style: TextStyle(
+                  fontSize: isNarrow ? 18 : 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
             isVeryNarrow
                 ? IconButton(
                     onPressed: _addBlock,
-                    icon: const Icon(Icons.add),
+                    icon: const Icon(Icons.timer),
                     tooltip: 'Добавить блок',
                   )
                 : ElevatedButton.icon(
                     onPressed: _addBlock,
-                    icon: const Icon(Icons.add, size: 18),
+                    icon: Icon(isNarrow ? Icons.timer : Icons.add, size: 18),
                     label: Text(
                       isNarrow ? 'Добавить' : 'Добавить блок',
                       style: const TextStyle(fontSize: 14),
@@ -129,8 +133,7 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
                       onDelete: () => _deleteBlock(index),
                       onUpdate: (updatedBlock) =>
                           _updateBlock(index, updatedBlock),
-                      showDeleteButton:
-                          _sequence.blocks.length >
+                      showDeleteButton: _sequence.blocks.length >
                           1, // Hide delete button for last block
                     );
                   }),
