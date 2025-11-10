@@ -199,7 +199,7 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
                   shape: const CircleBorder(),
                   minimumSize: Size(btnSize, btnSize),
                   visualDensity: compact
-                      ? VisualDensity(horizontal: -2, vertical: -2)
+                      ? const VisualDensity(horizontal: -2, vertical: -2)
                       : VisualDensity.standard,
                 ),
                 child: Icon(
@@ -219,7 +219,7 @@ class _TimeInputWidgetState extends State<TimeInputWidget> {
                   shape: const CircleBorder(),
                   minimumSize: Size(btnSize, btnSize),
                   visualDensity: compact
-                      ? VisualDensity(horizontal: -2, vertical: -2)
+                      ? const VisualDensity(horizontal: -2, vertical: -2)
                       : VisualDensity.standard,
                 ),
                 child: Icon(
