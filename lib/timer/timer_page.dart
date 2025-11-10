@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'timer_model.dart';
 import 'timer_service.dart';
 import 'timer_setup_widget.dart';
@@ -38,6 +39,18 @@ class _TimerPageState extends State<TimerPage> {
     _timerService.setSequence(_sequence);
     // Добавляем слушатель изменений таймера
     _timerService.addListener(_onTimerChanged);
+
+    // В debug-режиме автоматически запускаем таймер с небольшой задержкой,
+    // чтобы можно было сделать скриншот стартового экрана.
+    if (!kReleaseMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && _timerService.status == TimerStatus.stopped) {
+            _startTimer();
+          }
+        });
+      });
+    }
   }
 
   @override
