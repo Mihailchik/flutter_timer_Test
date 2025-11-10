@@ -21,12 +21,12 @@ class _TimerPageState extends State<TimerPage> {
   TimerSequence _sequence = TimerSequence(
     blocks: [
       TimerBlock(
-        name: 'Блок 1',
+    name: 'Block 1',
         repeats: 1,
         items: [
-          TimerItem(name: 'Упражнение 1', duration: 4, isPause: false),
-          TimerItem(name: 'Отдых 1', duration: 2, isPause: true),
-          TimerItem(name: 'Упражнение 2', duration: 2, isPause: false),
+    TimerItem(name: 'Exercise 1', duration: 4, isPause: false),
+    TimerItem(name: 'Rest 1', duration: 2, isPause: true),
+    TimerItem(name: 'Exercise 2', duration: 2, isPause: false),
         ],
       ),
     ],
@@ -84,7 +84,7 @@ class _TimerPageState extends State<TimerPage> {
     final compactHeight = MediaQuery.of(context).size.height < 600;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Таймер интервальных тренировок'),
+      title: const Text('Interval Training Timer'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Container(
@@ -128,7 +128,7 @@ class _TimerPageState extends State<TimerPage> {
                             ),
                           ),
                           child: const Text(
-                            'Старт',
+            'Start',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,

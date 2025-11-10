@@ -54,7 +54,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
   }
 
   void _updateBlock() {
-    final name = _nameController.text.isEmpty ? 'Блок' : _nameController.text;
+    final name = _nameController.text.isEmpty ? 'Block' : _nameController.text;
 
     int repeats = 1;
     try {
@@ -91,13 +91,13 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
 
   String _generateDefaultName(int index) {
     if (index % 2 == 0) {
-      // Упражнение
+      // Exercise
       final exerciseNumber = (index ~/ 2) + 1;
-      return 'Упражнение $exerciseNumber';
+      return 'Exercise $exerciseNumber';
     } else {
-      // Пауза
+      // Rest
       final restNumber = (index + 1) ~/ 2;
-      return 'Отдых $restNumber';
+      return 'Rest $restNumber';
     }
   }
 
@@ -198,7 +198,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                         child: TextField(
                           controller: _nameController,
                           decoration: const InputDecoration(
-                            labelText: 'Название блока',
+                            labelText: 'Block name',
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 8,
@@ -221,7 +221,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                                 controller: _repeatsController,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
-                                  labelText: 'Повторы',
+                                  labelText: 'Repeats',
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -314,7 +314,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Таймеры в блоке:',
+              'Timers in block:',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -343,7 +343,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                       child: TextField(
                         controller: nameController,
                         decoration: const InputDecoration(
-                          labelText: 'Название',
+                          labelText: 'Name',
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 8,
@@ -406,7 +406,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                     size: 18,
                   ), // Увеличили размер иконки
                   label: Text(
-                    'Добавить таймер',
+                    'Add timer',
                     style: TextStyle(fontSize: compact ? 12 : 14),
                   ),
                   style: TextButton.styleFrom(
