@@ -10,4 +10,7 @@
 # Keep documentation and screenshots
 !README.md
 !HELP.md
+!CHANGELOG.md
 !docs/
+# Ignore local project rules file (kept out of VCS)
+PROJECT_RULES.md
