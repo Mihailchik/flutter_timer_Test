@@ -12,6 +12,7 @@
 !HELP.md
 !CHANGELOG.md
 !docs/
+!Dogs/
 
 # Explicitly ignore local VS Code settings
 /.vscode/
