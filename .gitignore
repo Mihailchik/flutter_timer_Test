@@ -10,4 +10,8 @@
 # Keep documentation and screenshots
 !README.md
 !HELP.md
+!CHANGELOG.md
 !docs/
+
+# Explicitly ignore local VS Code settings
+/.vscode/
