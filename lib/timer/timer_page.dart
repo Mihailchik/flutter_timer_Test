@@ -87,7 +87,8 @@ class _TimerPageState extends State<TimerPage> {
         if (name == 'Exercise') name = loc.exercise;
         if (name == 'Rest') name = loc.rest;
         if (name != it.name) {
-          return TimerItem(name: name, duration: it.duration, isPause: it.isPause);
+          return TimerItem(
+              name: name, duration: it.duration, isPause: it.isPause);
         }
         return it;
       }).toList();
@@ -96,7 +97,8 @@ class _TimerPageState extends State<TimerPage> {
 
     final updated = TimerSequence(blocks: updatedBlocks);
     // Если что-то изменилось — применим и сохраним
-    final changed = updated.toJson().toString() != _sequence.toJson().toString();
+    final changed =
+        updated.toJson().toString() != _sequence.toJson().toString();
     if (changed) {
       _updateSequence(updated);
     }
@@ -132,6 +134,105 @@ class _TimerPageState extends State<TimerPage> {
     setState(() {});
   }
 
+  TimerSequence _defaultSequence() {
+    return TimerSequence(
+      blocks: [
+        TimerBlock(
+          name: 'startBlock',
+          repeats: 1,
+          items: [
+            TimerItem(name: 'Exercise', duration: 60, isPause: false),
+            TimerItem(name: 'Rest', duration: 30, isPause: true),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _resetToDefaultConfig() {
+    final def = _defaultSequence();
+    _updateSequence(def);
+  }
+
+  void _openSettings() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        final compact = MediaQuery.of(ctx).size.width < 360;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.settings,
+                      color: Theme.of(ctx).colorScheme.primary),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Setup',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                title: const Text('Mute'),
+                value: _timerService.muted,
+                onChanged: (val) {
+                  _timerService.setMuted(val);
+                  setState(() {});
+                },
+                secondary: Icon(
+                  _timerService.muted ? Icons.volume_off : Icons.volume_up,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _resetToDefaultConfig();
+                    Navigator.of(ctx).pop();
+                  },
+                  icon: const Icon(Icons.restore),
+                  label: const Text('Reset to default'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 10 : 12,
+                      vertical: compact ? 8 : 10,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  icon: const Icon(Icons.expand_less),
+                  label: const Text('Collapse settings'),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 10 : 12,
+                      vertical: compact ? 8 : 10,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Автоподстановка локализованных названий элементов в стартовой конфигурации
@@ -143,11 +244,9 @@ class _TimerPageState extends State<TimerPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
-            tooltip: _timerService.muted ? 'Muted' : 'Sound on',
-            icon: Icon(
-              _timerService.muted ? Icons.volume_off : Icons.volume_up,
-            ),
-            onPressed: _toggleMute,
+            tooltip: 'Setup',
+            icon: const Icon(Icons.settings),
+            onPressed: _openSettings,
           ),
         ],
       ),
@@ -191,14 +290,14 @@ class _TimerPageState extends State<TimerPage> {
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                             ),
-                          child: Text(
-                            SimpleLocalizations.of(context).start,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                            child: Text(
+                              SimpleLocalizations.of(context).start,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
                           ),
                         ),
                       ],
