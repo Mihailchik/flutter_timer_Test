@@ -121,6 +121,7 @@ class TimerService extends ChangeNotifier {
     notifyListeners();
   }
 
+
   // Lightweight JSON helpers without bringing full dart:convert here
   // We still use dart:convert but hide in methods to avoid scattered usage
   Map<String, dynamic> _decodeJson(String jsonStr) {

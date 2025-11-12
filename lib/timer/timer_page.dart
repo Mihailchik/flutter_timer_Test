@@ -45,6 +45,7 @@ class _TimerPageState extends State<TimerPage> {
     _initLoad();
     // Загружаем настройку mute
     _timerService.loadMuted();
+    // Рантайм-состояние таймера не восстанавливаем — сохраняем только конфигурацию
   }
 
   Future<void> _initLoad() async {

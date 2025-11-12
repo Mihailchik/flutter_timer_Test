@@ -25,6 +25,18 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
     _sequence = widget.sequence;
   }
 
+  @override
+  void didUpdateWidget(covariant TimerSetupWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Синхронизируем локальное состояние с переданной последовательностью,
+    // чтобы загруженные из хранилища данные отобразились корректно.
+    if (widget.sequence.toJson().toString() != _sequence.toJson().toString()) {
+      setState(() {
+        _sequence = widget.sequence;
+      });
+    }
+  }
+
   void _updateSequence() {
     widget.onSequenceUpdate(_sequence);
   }
