@@ -16,6 +16,7 @@ class TimerPage extends StatefulWidget {
 
 class _TimerPageState extends State<TimerPage> {
   late TimerService _timerService;
+  bool _settingsOpen = false;
 
   // Updated sequence according to requirements:
   // 1 блок "startBlock": 1 упражнение 1 мин, 1 отдых 30 сек
@@ -154,83 +155,10 @@ class _TimerPageState extends State<TimerPage> {
     _updateSequence(def);
   }
 
-  void _openSettings() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        final compact = MediaQuery.of(ctx).size.width < 360;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.settings,
-                      color: Theme.of(ctx).colorScheme.primary),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Setup',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: const Text('Mute'),
-                value: _timerService.muted,
-                onChanged: (val) {
-                  _timerService.setMuted(val);
-                  setState(() {});
-                },
-                secondary: Icon(
-                  _timerService.muted ? Icons.volume_off : Icons.volume_up,
-                ),
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    _resetToDefaultConfig();
-                    Navigator.of(ctx).pop();
-                  },
-                  icon: const Icon(Icons.restore),
-                  label: const Text('Reset to default'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 10 : 12,
-                      vertical: compact ? 8 : 10,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  icon: const Icon(Icons.expand_less),
-                  label: const Text('Collapse settings'),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 10 : 12,
-                      vertical: compact ? 8 : 10,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
+  void _toggleSettingsPanel() {
+    setState(() {
+      _settingsOpen = !_settingsOpen;
+    });
   }
 
   @override
@@ -244,9 +172,9 @@ class _TimerPageState extends State<TimerPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
-            tooltip: 'Setup',
-            icon: const Icon(Icons.settings),
-            onPressed: _openSettings,
+            tooltip: _settingsOpen ? 'Close setup' : 'Setup',
+            icon: Icon(_settingsOpen ? Icons.close : Icons.settings),
+            onPressed: _toggleSettingsPanel,
           ),
         ],
       ),
@@ -264,6 +192,75 @@ class _TimerPageState extends State<TimerPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                AnimatedCrossFade(
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.settings,
+                                  color: Theme.of(context).colorScheme.primary),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Setup',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                tooltip: 'Collapse settings',
+                                icon: const Icon(Icons.expand_less),
+                                onPressed: () => setState(() {
+                                  _settingsOpen = false;
+                                }),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          SwitchListTile(
+                            title: const Text('Mute'),
+                            value: _timerService.muted,
+                            onChanged: (val) {
+                              _timerService.setMuted(val);
+                              setState(() {});
+                            },
+                            secondary: Icon(
+                              _timerService.muted
+                                  ? Icons.volume_off
+                                  : Icons.volume_up,
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          const SizedBox(height: 6),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _resetToDefaultConfig,
+                              icon: const Icon(Icons.restore),
+                              label: const Text('Reset to default'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  crossFadeState: _settingsOpen
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 200),
+                ),
                 if (_timerService.status == TimerStatus.stopped)
                   Expanded(
                     child: Column(
