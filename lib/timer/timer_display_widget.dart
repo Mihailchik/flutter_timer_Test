@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/simple_localizations.dart';
 import 'timer_service.dart';
 
 class TimerDisplayWidget extends StatefulWidget {
@@ -85,7 +86,8 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
 
   List<Widget> _getProgressInfo() {
     // Если это подготовительный таймер, не показываем информацию о блоках
-    if (widget.timerService.currentPhase == TimerPhase.preparation) {
+    if (widget.timerService.currentPhase == TimerPhase.preparation ||
+        widget.timerService.currentPhase == TimerPhase.replayPrep) {
       return [];
     }
 
@@ -93,19 +95,28 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
       if (widget.timerService.currentBlock != null &&
           widget.timerService.currentBlock!.repeats > 1)
         Text(
-          'Repeat ${widget.timerService.currentRepeat + 1} of ${widget.timerService.currentBlock?.repeats ?? 1}',
+          SimpleLocalizations.of(context).repeatOf(
+            widget.timerService.currentRepeat + 1,
+            widget.timerService.currentBlock?.repeats ?? 1,
+          ),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
       const SizedBox(height: 10),
       Text(
-        'Block ${widget.timerService.currentBlockIndex + 1} of ${widget.timerService.sequence?.blocks.length ?? 1}',
+        SimpleLocalizations.of(context).blockOf(
+          widget.timerService.currentBlockIndex + 1,
+          widget.timerService.sequence?.blocks.length ?? 1,
+        ),
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
       ),
       const SizedBox(height: 10),
       if (widget.timerService.currentBlock != null &&
           widget.timerService.currentItem != null)
         Text(
-          'Timer ${widget.timerService.currentItemIndex + 1} of ${widget.timerService.currentBlock?.items.length ?? 1}',
+          SimpleLocalizations.of(context).timerOf(
+            widget.timerService.currentItemIndex + 1,
+            widget.timerService.currentBlock?.items.length ?? 1,
+          ),
           style: const TextStyle(fontSize: 16),
         ),
     ];
@@ -115,6 +126,8 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
     switch (widget.timerService.currentPhase) {
       case TimerPhase.preparation:
         return Colors.yellow.shade100; // Желтый для подготовки
+      case TimerPhase.replayPrep:
+        return Colors.yellow.shade100; // Такой же цвет как подготовка
       case TimerPhase.pause:
         // Красный для паузы, на второй половине — на тон темнее
         final isSecondHalf = widget.timerService.isInSecondHalf;
@@ -135,15 +148,18 @@ class _TimerDisplayWidgetState extends State<TimerDisplayWidget> {
   }
 
   String _getDisplayTitle() {
+    final loc = SimpleLocalizations.of(context);
     switch (widget.timerService.currentPhase) {
       case TimerPhase.preparation:
-        return 'Get ready';
+        return loc.getReady;
+      case TimerPhase.replayPrep:
+        return loc.replayPrepare;
       case TimerPhase.pause:
         final currentItem = widget.timerService.currentItem;
-        return currentItem?.name ?? 'Rest';
+        return currentItem?.name ?? loc.rest;
       case TimerPhase.exercise:
         final currentItem = widget.timerService.currentItem;
-        return currentItem?.name ?? 'Exercise';
+        return currentItem?.name ?? loc.exercise;
     }
   }
 }

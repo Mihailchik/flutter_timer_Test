@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/simple_localizations.dart';
 import 'timer_service.dart';
 
 class TimerControlsWidget extends StatelessWidget {
@@ -6,6 +7,7 @@ class TimerControlsWidget extends StatelessWidget {
   final VoidCallback onStart;
   final VoidCallback onPause;
   final VoidCallback onReset;
+  final VoidCallback onReplay;
 
   const TimerControlsWidget({
     super.key,
@@ -13,6 +15,7 @@ class TimerControlsWidget extends StatelessWidget {
     required this.onStart,
     required this.onPause,
     required this.onReset,
+    required this.onReplay,
   });
 
   @override
@@ -55,6 +58,19 @@ class TimerControlsWidget extends StatelessWidget {
                 alignment: Alignment.center,
               ),
               child: Icon(Icons.pause,
+                  size: compact ? 28 : 36, color: Colors.white),
+            ),
+          if (timerService.status != TimerStatus.stopped)
+            ElevatedButton(
+              onPressed: onReplay,
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.zero,
+                shape: const CircleBorder(),
+                backgroundColor: Colors.blue,
+                fixedSize: Size(compact ? 44 : 72, compact ? 44 : 72),
+                alignment: Alignment.center,
+              ),
+              child: Icon(Icons.replay,
                   size: compact ? 28 : 36, color: Colors.white),
             ),
           ElevatedButton(

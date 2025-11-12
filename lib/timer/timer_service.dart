@@ -1,13 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'timer_model.dart';
 import '../features/timer/infra/sound_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum TimerStatus { stopped, running, paused }
 
 // Добавим тип для идентификации текущего состояния таймера
-enum TimerPhase { preparation, exercise, pause }
+enum TimerPhase { preparation, exercise, pause, replayPrep }
 
 class TimerService extends ChangeNotifier {
   TimerStatus _status = TimerStatus.stopped;
@@ -34,6 +36,21 @@ class TimerService extends ChangeNotifier {
   bool _endSoundPlayed = false;
   // Second half state flag for UI highlighting
   bool _isInSecondHalf = false;
+
+  // Global mute flag (no sounds when true)
+  bool _muted = false;
+  bool get muted => _muted;
+  Future<void> setMuted(bool value) async {
+    _muted = value;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('timer_muted', _muted);
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  // Replay countdown flag (5 sec pause before replaying current item)
+  bool _isReplayCountdown = false;
 
   TimerService();
 
@@ -65,6 +82,53 @@ class TimerService extends ChangeNotifier {
     _sequence = sequence;
     reset();
     notifyListeners();
+  }
+
+  // Persist sequence to storage
+  Future<void> saveSequence() async {
+    if (_sequence == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = _sequence!.toJson();
+      // Store as JSON string
+      final jsonStr = _encodeJson(data);
+      await prefs.setString('timer_sequence_v1', jsonStr);
+    } catch (e) {
+      debugPrint('saveSequence error: $e');
+    }
+  }
+
+  // Load sequence from storage
+  Future<TimerSequence?> loadSequence() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString('timer_sequence_v1');
+      if (jsonStr == null) return null;
+      final map = _decodeJson(jsonStr);
+      return TimerSequence.fromJson(map);
+    } catch (e) {
+      debugPrint('loadSequence error: $e');
+      return null;
+    }
+  }
+
+  // Load mute flag from storage
+  Future<void> loadMuted() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _muted = prefs.getBool('timer_muted') ?? false; // default: not muted
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  // Lightweight JSON helpers without bringing full dart:convert here
+  // We still use dart:convert but hide in methods to avoid scattered usage
+  Map<String, dynamic> _decodeJson(String jsonStr) {
+    return (const JsonDecoder()).convert(jsonStr) as Map<String, dynamic>;
+  }
+
+  String _encodeJson(Map<String, dynamic> obj) {
+    return const JsonEncoder().convert(obj);
   }
 
   // Start the timer
@@ -136,7 +200,7 @@ class TimerService extends ChangeNotifier {
     _endSoundPlayed = false;
 
     notifyListeners();
-    debugPrint('=== TimerService.reset() finished ===');
+  debugPrint('=== TimerService.reset() finished ===');
   }
 
   // Start the internal timer
@@ -169,16 +233,20 @@ class TimerService extends ChangeNotifier {
       _remainingTime--;
       debugPrint('Decremented time to: $_remainingTime');
 
-      // Countdown signals at 3/2/1 seconds
-      if (_remainingTime == 3) {
-        debugPrint('Playing countdown sound: 3');
-        _playCountdownSound(3);
-      } else if (_remainingTime == 2) {
-        debugPrint('Playing countdown sound: 2');
-        _playCountdownSound(2);
-      } else if (_remainingTime == 1) {
-        debugPrint('Playing countdown sound: 1');
-        _playCountdownSound(1);
+      // Countdown signals at 3/2/1 seconds — только НЕ на экранах подготовки
+      final isPrepPhase = !_preparationCompleted;
+      final isReplayPrep = _isReplayCountdown;
+      if (!isPrepPhase && !isReplayPrep) {
+        if (_remainingTime == 3) {
+          debugPrint('Playing countdown sound: 3');
+          _playCountdownSound(3);
+        } else if (_remainingTime == 2) {
+          debugPrint('Playing countdown sound: 2');
+          _playCountdownSound(2);
+        } else if (_remainingTime == 1) {
+          debugPrint('Playing countdown sound: 1');
+          _playCountdownSound(1);
+        }
       }
 
       // Play halfway sound if needed (только для основных блоков, не для подготовки)
@@ -212,6 +280,20 @@ class TimerService extends ChangeNotifier {
     // Time is up - handle transitions
     debugPrint('Time is up, handling transition');
     // End sound уже проигран на момент достижения 00
+
+    // If replay countdown finished, start current item fresh
+    if (_isReplayCountdown) {
+      _isReplayCountdown = false;
+      final item = currentItem;
+      if (item != null) {
+        _remainingTime = item.duration;
+        _halfwaySoundPlayed = false;
+        _endSoundPlayed = false;
+        _isInSecondHalf = false;
+        notifyListeners();
+        return; // do not advance to next item
+      }
+    }
 
     // Переход к следующему элементу или блоку
     _moveToNextItem();
@@ -306,6 +388,7 @@ class TimerService extends ChangeNotifier {
 
   // Play sound at halfway point: "бииип" (средняя длительность)
   Future<void> _playHalfwaySound() async {
+    if (_muted) return;
     await _soundService.playBeep(
       durationMs: 200,
       frequency: 440,
@@ -317,6 +400,7 @@ class TimerService extends ChangeNotifier {
 
   // Play sound at end of timer block: "0-бииииииип" (длинный)
   Future<void> _playEndSound() async {
+    if (_muted) return;
     await _soundService.playBeep(
       durationMs: 700,
       frequency: 440,
@@ -328,6 +412,7 @@ class TimerService extends ChangeNotifier {
 
   // Play sound for countdown (3/2/1) с растущей длительностью: бип/биип/бииип
   Future<void> _playCountdownSound(int secondsLeft) async {
+    if (_muted) return;
     if (secondsLeft == 3) {
       await _soundService.playBeep(
         durationMs: 120,
@@ -373,6 +458,11 @@ class TimerService extends ChangeNotifier {
 
   // Get current phase for color coding
   TimerPhase get currentPhase {
+    // Отдельная фаза подготовки к повтору — приоритетно
+    if (_isReplayCountdown && _status != TimerStatus.stopped) {
+      return TimerPhase.replayPrep;
+    }
+
     // Если это подготовительный таймер и он еще не завершен
     if (!_preparationCompleted && _status != TimerStatus.stopped) {
       return TimerPhase.preparation;
@@ -393,4 +483,39 @@ class TimerService extends ChangeNotifier {
 
   // Expose UI helpers
   bool get isInSecondHalf => _isInSecondHalf;
+
+  // Повторить текущий элемент (с 5 сек паузы перед стартом)
+  void repeatLast() {
+    debugPrint('=== TimerService.repeatLast() called ===');
+    if (_sequence == null || _sequence!.blocks.isEmpty) {
+      debugPrint('No sequence to repeat');
+      return;
+    }
+
+    // Если еще идет подготовка — просто переиграем ее
+    if (!_preparationCompleted) {
+      debugPrint('Repeating preparation segment');
+      _timer?.cancel();
+      _remainingTime = preparationTime;
+      _halfwaySoundPlayed = false;
+      _endSoundPlayed = false;
+      _isInSecondHalf = false;
+      _status = TimerStatus.running;
+      _startTimer();
+      notifyListeners();
+      return;
+    }
+
+    // Запускаем 5-секундную паузу перед повтором текущего элемента
+    _timer?.cancel();
+    _isReplayCountdown = true;
+    _halfwaySoundPlayed = false;
+    _endSoundPlayed = false;
+    _isInSecondHalf = false;
+    _remainingTime = 5;
+    _status = TimerStatus.running;
+    debugPrint('Starting 5-second replay countdown for current item');
+    _startTimer();
+    notifyListeners();
+  }
 }
