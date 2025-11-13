@@ -13,6 +13,8 @@
 !CHANGELOG.md
 !docs/
 !Dogs/
+!ios/Runner/Info.plist
+!ios/Runner.xcodeproj/project.pbxproj
 
 # Explicitly ignore local VS Code settings
 /.vscode/

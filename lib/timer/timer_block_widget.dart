@@ -44,6 +44,29 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant TimerBlockWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Если блок был обновлён (например, загружен из хранилища),
+    // синхронизируем контроллеры и внутреннее состояние.
+    if (oldWidget.block != widget.block) {
+      _nameController.text = widget.block.name;
+      _repeatsController.text = widget.block.repeats.toString();
+
+      // Переинициализируем контроллеры имён элементов под текущий блок
+      for (final c in _itemControllers) {
+        c.dispose();
+      }
+      _itemControllers = [];
+      for (int i = 0; i < widget.block.items.length; i++) {
+        _itemControllers.add(
+          TextEditingController(text: widget.block.items[i].name),
+        );
+      }
+      setState(() {});
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _repeatsController.dispose();
@@ -138,6 +161,11 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
       // Create updated items list without deleted item
       final List<TimerItem> updatedItems = List.from(widget.block.items);
       updatedItems.removeAt(index);
+
+      // Пересчитать типы упражнение/пауза по позиции, чтобы цвета совпадали
+      for (int i = 0; i < updatedItems.length; i++) {
+        updatedItems[i] = updatedItems[i].copyWith(isPause: i % 2 == 1);
+      }
 
       widget.onUpdate(widget.block.copyWith(items: updatedItems));
     });
@@ -333,7 +361,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: index % 2 == 0 ? Colors.green : Colors.red,
+                        color: item.isPause ? Colors.red : Colors.green,
                         shape: BoxShape.circle,
                       ),
                     ),

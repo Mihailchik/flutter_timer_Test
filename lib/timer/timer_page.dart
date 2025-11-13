@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/simple_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'timer_model.dart';
 import 'timer_service.dart';
@@ -15,22 +16,24 @@ class TimerPage extends StatefulWidget {
 
 class _TimerPageState extends State<TimerPage> {
   late TimerService _timerService;
+  bool _settingsOpen = false;
 
   // Updated sequence according to requirements:
-  // 1 block with alternating exercise and pause timers
+  // 1 блок "startBlock": 1 упражнение 1 мин, 1 отдых 30 сек
   TimerSequence _sequence = TimerSequence(
     blocks: [
       TimerBlock(
-    name: 'Block 1',
+        name: 'startBlock',
         repeats: 1,
         items: [
-    TimerItem(name: 'Exercise 1', duration: 4, isPause: false),
-    TimerItem(name: 'Rest 1', duration: 2, isPause: true),
-    TimerItem(name: 'Exercise 2', duration: 2, isPause: false),
+          TimerItem(name: 'Exercise', duration: 60, isPause: false),
+          TimerItem(name: 'Rest', duration: 30, isPause: true),
         ],
       ),
     ],
   );
+
+  bool _localizedDefaultsApplied = false;
 
   @override
   void initState() {
@@ -39,6 +42,18 @@ class _TimerPageState extends State<TimerPage> {
     _timerService.setSequence(_sequence);
     // Добавляем слушатель изменений таймера
     _timerService.addListener(_onTimerChanged);
+    // Загружаем сохранённую последовательность, если она есть
+    _initLoad();
+    // Загружаем настройку mute
+    _timerService.loadMuted();
+    // Рантайм-состояние таймера не восстанавливаем — сохраняем только конфигурацию
+  }
+
+  Future<void> _initLoad() async {
+    final loaded = await _timerService.loadSequence();
+    if (loaded != null) {
+      _updateSequence(loaded);
+    }
   }
 
   @override
@@ -59,6 +74,36 @@ class _TimerPageState extends State<TimerPage> {
       _sequence = sequence;
       _timerService.setSequence(sequence);
     });
+    // Сохраняем обновлённую последовательность
+    _timerService.saveSequence();
+  }
+
+  void _ensureLocalizedDefaults(BuildContext context) {
+    if (_localizedDefaultsApplied) return;
+    final loc = SimpleLocalizations.of(context);
+    // Меняем только дефолтные английские названия на локализованные
+    final updatedBlocks = _sequence.blocks.map((b) {
+      final updatedItems = b.items.map((it) {
+        String name = it.name;
+        if (name == 'Exercise') name = loc.exercise;
+        if (name == 'Rest') name = loc.rest;
+        if (name != it.name) {
+          return TimerItem(
+              name: name, duration: it.duration, isPause: it.isPause);
+        }
+        return it;
+      }).toList();
+      return TimerBlock(name: b.name, repeats: b.repeats, items: updatedItems);
+    }).toList();
+
+    final updated = TimerSequence(blocks: updatedBlocks);
+    // Если что-то изменилось — применим и сохраним
+    final changed =
+        updated.toJson().toString() != _sequence.toJson().toString();
+    if (changed) {
+      _updateSequence(updated);
+    }
+    _localizedDefaultsApplied = true;
   }
 
   void _startTimer() {
@@ -79,13 +124,59 @@ class _TimerPageState extends State<TimerPage> {
     _timerService.reset();
   }
 
+  void _replayLast() {
+    _timerService.repeatLast();
+    setState(() {});
+  }
+
+  void _toggleMute() {
+    final newVal = !_timerService.muted;
+    _timerService.setMuted(newVal);
+    setState(() {});
+  }
+
+  TimerSequence _defaultSequence() {
+    return TimerSequence(
+      blocks: [
+        TimerBlock(
+          name: 'startBlock',
+          repeats: 1,
+          items: [
+            TimerItem(name: 'Exercise', duration: 60, isPause: false),
+            TimerItem(name: 'Rest', duration: 30, isPause: true),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _resetToDefaultConfig() {
+    final def = _defaultSequence();
+    _updateSequence(def);
+  }
+
+  void _toggleSettingsPanel() {
+    setState(() {
+      _settingsOpen = !_settingsOpen;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Автоподстановка локализованных названий элементов в стартовой конфигурации
+    _ensureLocalizedDefaults(context);
     final compactHeight = MediaQuery.of(context).size.height < 600;
     return Scaffold(
       appBar: AppBar(
-      title: const Text('Interval Training Timer'),
+        title: Text(SimpleLocalizations.of(context).appTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            tooltip: _settingsOpen ? 'Close setup' : 'Setup',
+            icon: Icon(_settingsOpen ? Icons.close : Icons.settings),
+            onPressed: _toggleSettingsPanel,
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -101,63 +192,132 @@ class _TimerPageState extends State<TimerPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-              if (_timerService.status == TimerStatus.stopped)
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: TimerSetupWidget(
-                          sequence: _sequence,
-                          onSequenceUpdate: _updateSequence,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _startTimer,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
+                AnimatedCrossFade(
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 6.0),
+                      child: Row(
+                        children: [
+                          // Кнопка mute — сама по себе переключатель
+                          IconButton(
+                            tooltip: _timerService.muted ? 'Unmute' : 'Mute',
+                            icon: Icon(
+                              _timerService.muted
+                                  ? Icons.volume_off
+                                  : Icons.volume_up,
+                              // Только символ, цвет — аккуратный и читаемый
+                              color: _timerService.muted
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                  : Theme.of(context).colorScheme.primary,
                             ),
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
+                            iconSize: 20,
+                            constraints: const BoxConstraints.tightFor(
+                                width: 36, height: 36),
+                            onPressed: () {
+                              _toggleMute();
+                            },
+                          ),
+                          const SizedBox(width: 6),
+                          // Центрируем кнопку Reset в строке
+                          Expanded(
+                            child: Center(
+                              child: OutlinedButton.icon(
+                                onPressed: _resetToDefaultConfig,
+                                icon: const Icon(Icons.restore),
+                                label: const Text('Reset to default'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 8),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ),
                             ),
                           ),
-                          child: const Text(
-            'Start',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          const Spacer(),
+                          // Кнопка сворачивания панели — без подписи
+                          IconButton(
+                            tooltip: 'Collapse',
+                            icon: const Icon(Icons.expand_less),
+                            iconSize: 20,
+                            constraints: const BoxConstraints.tightFor(
+                                width: 36, height: 36),
+                            onPressed: () => setState(() {
+                              _settingsOpen = false;
+                            }),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                )
-              else
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: TimerDisplayWidget(timerService: _timerService),
-                      ),
-                      SizedBox(height: compactHeight ? 12 : 20),
-                      TimerControlsWidget(
-                        timerService: _timerService,
-                        onStart: _startTimer,
-                        onPause: _pauseTimer,
-                        onReset: _resetTimer,
-                      ),
-                    ],
-                  ),
+                  crossFadeState: _settingsOpen
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 200),
                 ),
+                if (_timerService.status == TimerStatus.stopped)
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: TimerSetupWidget(
+                            sequence: _sequence,
+                            onSequenceUpdate: _updateSequence,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _startTimer,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                            ),
+                            child: Text(
+                              SimpleLocalizations.of(context).start,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child:
+                              TimerDisplayWidget(timerService: _timerService),
+                        ),
+                        SizedBox(height: compactHeight ? 12 : 20),
+                        TimerControlsWidget(
+                          timerService: _timerService,
+                          onStart: _startTimer,
+                          onPause: _pauseTimer,
+                          onReset: _resetTimer,
+                          onReplay: _replayLast,
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

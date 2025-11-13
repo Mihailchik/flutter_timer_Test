@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter: Run on booted iOS simulator (device 1)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "933B2BD6-C857-411E-8C88-B6E2191EE2DB",
+      "flutterMode": "debug"
+    },
+    {
+      "name": "Flutter: Start iOS simulator (26.1) and run",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "EFB6DE5E-C731-4801-B4CC-06B05C268D4C",
+      "flutterMode": "debug",
+      "preLaunchTask": "Boot: iOS 26.1 Simulator (EFB6DE5E)"
+    },
+    {
+      "name": "Flutter Web (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "flutterMode": "debug"
+    }
+  ]
+}

@@ -17,6 +17,20 @@ class TimerItem {
   String toString() {
     return 'TimerItem(name: $name, duration: $duration, isPause: $isPause)';
   }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'duration': duration,
+        'isPause': isPause,
+      };
+
+  static TimerItem fromJson(Map<String, dynamic> json) {
+    return TimerItem(
+      name: json['name'] as String,
+      duration: json['duration'] as int,
+      isPause: (json['isPause'] as bool?) ?? false,
+    );
+  }
 }
 
 class TimerBlock {
@@ -44,6 +58,21 @@ class TimerBlock {
   String toString() {
     return 'TimerBlock(name: $name, items: $items, repeats: $repeats)';
   }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'repeats': repeats,
+        'items': items.map((e) => e.toJson()).toList(),
+      };
+
+  static TimerBlock fromJson(Map<String, dynamic> json) {
+    final itemsJson = json['items'] as List<dynamic>? ?? const [];
+    return TimerBlock(
+      name: json['name'] as String,
+      repeats: (json['repeats'] as int?) ?? 1,
+      items: itemsJson.map((e) => TimerItem.fromJson(e as Map<String, dynamic>)).toList(),
+    );
+  }
 }
 
 class TimerSequence {
@@ -63,5 +92,16 @@ class TimerSequence {
   @override
   String toString() {
     return 'TimerSequence(blocks: $blocks)';
+  }
+
+  Map<String, dynamic> toJson() => {
+        'blocks': blocks.map((b) => b.toJson()).toList(),
+      };
+
+  static TimerSequence fromJson(Map<String, dynamic> json) {
+    final blocksJson = json['blocks'] as List<dynamic>? ?? const [];
+    return TimerSequence(
+      blocks: blocksJson.map((e) => TimerBlock.fromJson(e as Map<String, dynamic>)).toList(),
+    );
   }
 }

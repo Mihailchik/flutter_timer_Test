@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Boot: iOS 26.1 Simulator (EFB6DE5E)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "set -e\n\n# Open Simulator app (no-op if already open)\nopen -a Simulator || true\n\n# Boot specific simulator (iPhone 15 iOS 26.1)\nxcrun simctl boot EFB6DE5E-C731-4801-B4CC-06B05C268D4C || true\n# Wait until fully booted\nxcrun simctl bootstatus EFB6DE5E-C731-4801-B4CC-06B05C268D4C -b"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "iOS: Boot simulator and run app",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "set -e\n\n# Open Simulator app (no-op if already open)\nopen -a Simulator || true\n\n# Try get a booted device UDID\nUDID=$(xcrun simctl list devices | awk '/Booted/{print $NF}' | sed 's/[()]//g' | head -n1)\n\nif [ -z \"$UDID\" ]; then\n  # Pick the first available iPhone simulator that is Shutdown\n  UDID=$(xcrun simctl list devices | awk '/iPhone/ && /Shutdown/{print $NF}' | sed 's/[()]//g' | head -n1)\n  if [ -z \"$UDID\" ]; then\n    echo 'No available iPhone simulators found. Please create one in Xcode.'\n    exit 1\n  fi\n  echo \"Booting simulator $UDID\"\n  xcrun simctl boot \"$UDID\"\n  # Wait until fully booted\n  xcrun simctl bootstatus \"$UDID\" -b\nelse\n  echo \"Using already booted simulator $UDID\"\n  xcrun simctl bootstatus booted -b || true\nfi\n\n# Show devices for debug\nflutter devices\n\n# Run the app on the selected simulator\nflutter run -d \"$UDID\""
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "iOS: Run on booted simulator",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "set -e\n\n# Get currently booted simulator UDID\nUDID=$(xcrun simctl list devices | awk '/Booted/{print $NF}' | sed 's/[()]//g' | head -n1)\nif [ -z \"$UDID\" ]; then\n  echo 'No booted iOS simulator found. Please start Simulator first.'\n  exit 1\nfi\n\n# Show devices for debug\nflutter devices\n\n# Run the app on the booted simulator\nflutter run -d \"$UDID\""
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
