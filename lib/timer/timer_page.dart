@@ -199,58 +199,78 @@ class _TimerPageState extends State<TimerPage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 6.0),
-                      child: Row(
-                        children: [
-                          // Кнопка mute — сама по себе переключатель
-                          IconButton(
-                            tooltip: _timerService.muted ? 'Unmute' : 'Mute',
-                            icon: Icon(
-                              _timerService.muted
-                                  ? Icons.volume_off
-                                  : Icons.volume_up,
-                              // Только символ, цвет — аккуратный и читаемый
-                              color: _timerService.muted
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                            iconSize: 20,
-                            constraints: const BoxConstraints.tightFor(
-                                width: 36, height: 36),
-                            onPressed: () {
-                              _toggleMute();
-                            },
-                          ),
-                          const SizedBox(width: 6),
-                          // Центрируем кнопку Reset в строке
-                          Expanded(
-                            child: Center(
-                              child: OutlinedButton.icon(
-                                onPressed: _resetToDefaultConfig,
-                                icon: const Icon(Icons.restore),
-                                label: const Text('Reset to default'),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 8),
-                                  visualDensity: VisualDensity.compact,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          const double setupIconSize = 20;
+                          return SizedBox(
+                            height: 44,
+                            width: constraints.maxWidth,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Центр — строго по середине экрана/контейнера
+                                Center(
+                                  child: OutlinedButton.icon(
+                                    onPressed: _resetToDefaultConfig,
+                                    icon: const Icon(Icons.restore,
+                                        size: setupIconSize),
+                                    label: const Text(
+                                      'Reset to default',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 8),
+                                      visualDensity: VisualDensity.compact,
+                                      minimumSize: const Size(0, 36),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                // Слева — mute
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IconButton(
+                                    tooltip:
+                                        _timerService.muted ? 'Unmute' : 'Mute',
+                                    icon: Icon(
+                                      _timerService.muted
+                                          ? Icons.volume_off
+                                          : Icons.volume_up,
+                                      color: _timerService.muted
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                      size: setupIconSize,
+                                    ),
+                                    iconSize: setupIconSize,
+                                    constraints: const BoxConstraints.tightFor(
+                                        width: 36, height: 36),
+                                    onPressed: _toggleMute,
+                                  ),
+                                ),
+                                // Справа — collapse
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: IconButton(
+                                    tooltip: 'Collapse',
+                                    icon: const Icon(Icons.expand_less,
+                                        size: setupIconSize),
+                                    iconSize: setupIconSize,
+                                    constraints: const BoxConstraints.tightFor(
+                                        width: 36, height: 36),
+                                    onPressed: () => setState(() {
+                                      _settingsOpen = false;
+                                    }),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const Spacer(),
-                          // Кнопка сворачивания панели — без подписи
-                          IconButton(
-                            tooltip: 'Collapse',
-                            icon: const Icon(Icons.expand_less),
-                            iconSize: 20,
-                            constraints: const BoxConstraints.tightFor(
-                                width: 36, height: 36),
-                            onPressed: () => setState(() {
-                              _settingsOpen = false;
-                            }),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
                   ),
