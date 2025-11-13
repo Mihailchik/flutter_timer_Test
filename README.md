@@ -10,7 +10,7 @@ This repository contains a standard Flutter project with app sources and platfor
 - Material UI with Material 3 support
 
 ## Screenshots
-- Setup screen: ![Setup Screen](docs/Simulator Screenshot - 1 - 2025-11-13 at 12.41.55.png)
+- Setup screen: ![Setup Screen](docs/screenshot_setup_2025-11-13.png)
 
 ## Quick Start
 - Install Flutter SDK.
@@ -43,7 +43,7 @@ Common platform‑specific notes and troubleshooting are in `HELP.md`.
 - Материальный интерфейс, поддержка Material 3
 
 ## Скриншот
-- Начальный экран: ![Начальный экран](docs/Simulator Screenshot - 1 - 2025-11-13 at 12.41.55.png)
+- Начальный экран: ![Начальный экран](docs/screenshot_setup_2025-11-13.png)
 
 ## Быстрый старт
 - Установите Flutter SDK.

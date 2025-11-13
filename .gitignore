@@ -12,7 +12,14 @@
 !HELP.md
 !CHANGELOG.md
 !docs/
-!Dogs/
+# Do not track local experimental folders
+# Dogs/ — локальная папка, исключаем из репозитория
+# Чтобы оставить файлы локально, используйте git rm --cached
+# (см. коммит в данной ветке)
+#
+# Исключаем Dogs из списка сохраняемых
+# (по умолчанию /* уже игнорирует всё, а ! снимает игнор)
+# Просто убираем правило !Dogs/
 !ios/Runner/Info.plist
 !ios/Runner.xcodeproj/project.pbxproj
 
