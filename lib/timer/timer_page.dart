@@ -195,62 +195,60 @@ class _TimerPageState extends State<TimerPage> {
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 6.0),
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.settings,
-                                  color: Theme.of(context).colorScheme.primary),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Setup',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              const Spacer(),
-                              IconButton(
-                                tooltip: 'Collapse settings',
-                                icon: const Icon(Icons.expand_less),
-                                onPressed: () => setState(() {
-                                  _settingsOpen = false;
-                                }),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          SwitchListTile(
-                            title: const Text('Mute'),
-                            value: _timerService.muted,
-                            onChanged: (val) {
-                              _timerService.setMuted(val);
-                              setState(() {});
-                            },
-                            secondary: Icon(
+                          // Кнопка mute — сама по себе переключатель
+                          IconButton(
+                            tooltip: _timerService.muted ? 'Unmute' : 'Mute',
+                            icon: Icon(
                               _timerService.muted
                                   ? Icons.volume_off
                                   : Icons.volume_up,
+                              // Только символ, цвет — аккуратный и читаемый
+                              color: _timerService.muted
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                  : Theme.of(context).colorScheme.primary,
                             ),
-                            contentPadding: EdgeInsets.zero,
+                            iconSize: 20,
+                            constraints: const BoxConstraints.tightFor(
+                                width: 36, height: 36),
+                            onPressed: () {
+                              _toggleMute();
+                            },
                           ),
-                          const SizedBox(height: 6),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _resetToDefaultConfig,
-                              icon: const Icon(Icons.restore),
-                              label: const Text('Reset to default'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 10),
+                          const SizedBox(width: 6),
+                          // Центрируем кнопку Reset в строке
+                          Expanded(
+                            child: Center(
+                              child: OutlinedButton.icon(
+                                onPressed: _resetToDefaultConfig,
+                                icon: const Icon(Icons.restore),
+                                label: const Text('Reset to default'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 8),
+                                  visualDensity: VisualDensity.compact,
+                                ),
                               ),
                             ),
+                          ),
+                          const Spacer(),
+                          // Кнопка сворачивания панели — без подписи
+                          IconButton(
+                            tooltip: 'Collapse',
+                            icon: const Icon(Icons.expand_less),
+                            iconSize: 20,
+                            constraints: const BoxConstraints.tightFor(
+                                width: 36, height: 36),
+                            onPressed: () => setState(() {
+                              _settingsOpen = false;
+                            }),
                           ),
                         ],
                       ),
