@@ -21,6 +21,16 @@
 - На Android/iOS — генерируется временный WAV в `systemTemp`, плеер 
   `audioplayers` воспроизводит файл через `DeviceFileSource`.
 
+### Иконки выглядят разного размера на Web / не загружаются
+- Причина: дев‑сервер/кэш браузера не подхватывает шрифт Material Icons, в логах виден
+  запрос `assets/FontManifest.json` с ошибкой.
+- Решения:
+  - Полностью перезапустите дев‑сервер: остановите текущий `flutter run -d web-server`,
+    запустите заново.
+  - Выполните жесткую перезагрузку страницы (Cmd/Ctrl+Shift+R), чтобы обновить кэш шрифтов.
+  - Если используете дополнительный прокси/cdn — отключите, проверьте локально.
+  - В коде можно задать единый размер через `Icon(size: 20)` и `iconTheme` в `MaterialApp`.
+
 ### Где править последовательность таймера?
 `lib/timer/timer_page.dart`, поле `_sequence`.
 
@@ -29,4 +39,3 @@
 - Выполните: `flutter screenshot -o docs/screenshot-setup.png -d <deviceId>`.
 - Нажмите "Старт" в приложении.
 - Выполните: `flutter screenshot -o docs/screenshot-running.png -d <deviceId>`.
-
