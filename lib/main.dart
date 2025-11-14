@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Interval Training Timer',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
         Locale('en'),
         Locale('ru'),
       ],
+      locale: const Locale('en'),
       home: const TimerPage(),
     );
   }

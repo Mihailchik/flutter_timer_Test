@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'timer_model.dart';
 import 'timer_block_widget.dart';
+import '../l10n/simple_localizations.dart';
 
 class TimerSetupWidget extends StatefulWidget {
   final TimerSequence sequence;
@@ -43,14 +44,15 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
 
   void _addBlock() {
     setState(() {
+      final loc = SimpleLocalizations.of(context);
       _sequence = _sequence.copyWith(
         blocks: [
           ..._sequence.blocks,
           TimerBlock(
-            name: 'Block ${_sequence.blocks.length + 1}',
+            name: '${loc.block} ${_sequence.blocks.length + 1}',
             items: [
-              TimerItem(name: 'Exercise', duration: 30, isPause: false),
-              TimerItem(name: 'Rest', duration: 15, isPause: true),
+              TimerItem(name: loc.exercise, duration: 30, isPause: false),
+              TimerItem(name: loc.rest, duration: 15, isPause: true),
             ],
             repeats: 1,
           ),
@@ -95,7 +97,7 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
           children: [
             Expanded(
               child: Text(
-                'Timer Setup',
+                SimpleLocalizations.of(context).timerSetup,
                 style: TextStyle(
                   fontSize: isNarrow ? 18 : 20,
                   fontWeight: FontWeight.bold,
@@ -108,13 +110,15 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
                 ? IconButton(
                     onPressed: _addBlock,
                     icon: const Icon(Icons.timer),
-                    tooltip: 'Add block',
+                    tooltip: SimpleLocalizations.of(context).addBlock,
                   )
                 : ElevatedButton.icon(
                     onPressed: _addBlock,
                     icon: Icon(isNarrow ? Icons.timer : Icons.add, size: 18),
                     label: Text(
-                      isNarrow ? 'Add' : 'Add block',
+                      isNarrow
+                          ? SimpleLocalizations.of(context).add
+                          : SimpleLocalizations.of(context).addBlock,
                       style: const TextStyle(fontSize: 14),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -127,13 +131,14 @@ class _TimerSetupWidgetState extends State<TimerSetupWidget> {
           ],
         ),
         SizedBox(height: isNarrow ? 12 : 20),
-        const Text(
-          'Timer blocks:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(
+          SimpleLocalizations.of(context).timerBlocks,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: isNarrow ? 8 : 10),
         if (_sequence.blocks.isEmpty)
-          const Center(child: Text('No blocks. Add a block to get started.'))
+          Center(
+              child: Text(SimpleLocalizations.of(context).noBlocks))
         else
           Expanded(
             child: SingleChildScrollView(

@@ -24,8 +24,8 @@ class TimerService extends ChangeNotifier {
   // Флаг для отслеживания завершения подготовительного таймера
   bool _preparationCompleted = false;
 
-  // Длительность стартового таймера (10 секунд)
-  static const int preparationTime = 10;
+  // Длительность стартового таймера (5 секунд)
+  static const int preparationTime = 5;
 
   // Sound service для звуковых эффектов
   final SoundService _soundService = SoundService();
@@ -121,7 +121,6 @@ class TimerService extends ChangeNotifier {
     notifyListeners();
   }
 
-
   // Lightweight JSON helpers without bringing full dart:convert here
   // We still use dart:convert but hide in methods to avoid scattered usage
   Map<String, dynamic> _decodeJson(String jsonStr) {
@@ -201,7 +200,7 @@ class TimerService extends ChangeNotifier {
     _endSoundPlayed = false;
 
     notifyListeners();
-  debugPrint('=== TimerService.reset() finished ===');
+    debugPrint('=== TimerService.reset() finished ===');
   }
 
   // Start the internal timer

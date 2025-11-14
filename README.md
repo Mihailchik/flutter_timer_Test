@@ -5,16 +5,11 @@ This repository contains a standard Flutter project with app sources and platfor
 
 ## Features
 - Configure a sequence of blocks and items (exercise/rest)
-- 10‑second preparation countdown
-- Audio cues: 3‑2‑1 countdown, finish, and mid‑point of long intervals
+- 5‑second preparation pause with a single cue at 00
+- Audio cues: finish and mid‑point of long intervals
 - Material UI with Material 3 support
 
-## Screenshots
-- Setup screen: ![Setup Screen](docs/screenshot_setup_2025-11-14.png)
-
-### App Store (iPhone)
-- 6.7" portrait: `docs/store/screenshot_setup_iphone_6.7_1290x2796.png`, `docs/store/screenshot_timer_iphone_6.7_1290x2796.png`
-- 6.5" portrait: `docs/store/screenshot_setup_iphone_6.5_1284x2778.png`, `docs/store/screenshot_timer_iphone_6.5_1284x2778.png`
+<!-- Screenshots section removed per request -->
 
 ## Quick Start
 - Install Flutter SDK.
@@ -33,25 +28,20 @@ On web, audio may require a user gesture due to autoplay policies.
 ## Help
 Common platform‑specific notes and troubleshooting are in `HELP.md`.
 
----
+----
 
-# FitTimer — простой таймер интервальных тренировок (русская версия)
+# FitTimer — простой таймер интервальных тренировок
 
 Минимальный кроссплатформенный таймер интервальных тренировок на Flutter.
 Репозиторий содержит стандартный Flutter‑проект с исходниками приложения и платформенными файлами.
 
 ## Возможности
 - Настройка последовательности блоков и элементов (упражнение/пауза)
-- Подготовительный отсчёт 10 секунд
-- Звуковые сигналы: обратный отсчёт 3–2–1, завершение и середина длинных интервалов
+- Подготовительная пауза 5 секунд с одним сигналом на 00
+- Звуковые сигналы: завершение и середина длинных интервалов
 - Материальный интерфейс, поддержка Material 3
 
-## Скриншот
-- Начальный экран: ![Начальный экран](docs/screenshot_setup_2025-11-14.png)
-
-### Для App Store (iPhone)
-- 6.7" портрет: `docs/store/screenshot_setup_iphone_6.7_1290x2796.png`, `docs/store/screenshot_timer_iphone_6.7_1290x2796.png`
-- 6.5" портрет: `docs/store/screenshot_setup_iphone_6.5_1284x2778.png`, `docs/store/screenshot_timer_iphone_6.5_1284x2778.png`
+<!-- Разделы со скриншотами и App Store удалены по запросу -->
 
 ## Быстрый старт
 - Установите Flutter SDK.

@@ -69,7 +69,9 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   void _onTimerChanged() {
-    // Обновляем состояние виджета при изменении таймера
+    if (_timerService.status != TimerStatus.stopped && _settingsOpen) {
+      _settingsOpen = false;
+    }
     setState(() {});
   }
 
@@ -77,6 +79,7 @@ class _TimerPageState extends State<TimerPage> {
     setState(() {
       _sequence = sequence;
       _timerService.setSequence(sequence);
+      _localizedDefaultsApplied = false;
     });
     // Сохраняем обновлённую последовательность
     _timerService.saveSequence();
@@ -97,7 +100,11 @@ class _TimerPageState extends State<TimerPage> {
         }
         return it;
       }).toList();
-      return TimerBlock(name: b.name, repeats: b.repeats, items: updatedItems);
+      var blockName = b.name;
+      if (blockName == 'startBlock') {
+        blockName = loc.startBlockName;
+      }
+      return TimerBlock(name: blockName, repeats: b.repeats, items: updatedItems);
     }).toList();
 
     final updated = TimerSequence(blocks: updatedBlocks);
@@ -113,6 +120,11 @@ class _TimerPageState extends State<TimerPage> {
   void _startTimer() {
     debugPrint('=== START BUTTON PRESSED ===');
     debugPrint('Timer service status before start: ${_timerService.status}');
+    if (_settingsOpen) {
+      setState(() {
+        _settingsOpen = false;
+      });
+    }
     _timerService.start();
     debugPrint('Timer service status after start: ${_timerService.status}');
 
@@ -172,23 +184,34 @@ class _TimerPageState extends State<TimerPage> {
     final compactHeight = MediaQuery.of(context).size.height < 600;
     return Scaffold(
       appBar: AppBar(
-        title: Text(SimpleLocalizations.of(context).appTitle),
+        title: FittedBox(
+          alignment: Alignment.centerLeft,
+          fit: BoxFit.scaleDown,
+          child: Text(
+            SimpleLocalizations.of(context).appTitle,
+            maxLines: 1,
+          ),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           if (_timerService.status == TimerStatus.stopped)
             Padding(
-              padding: const EdgeInsets.only(right: 12.0),
+              padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                tooltip: _settingsOpen ? 'Close setup' : 'Setup',
+                tooltip: _settingsOpen
+                    ? SimpleLocalizations.of(context).closeSetup
+                    : SimpleLocalizations.of(context).setup,
                 icon: Icon(_settingsOpen ? Icons.close : Icons.settings),
                 onPressed: _toggleSettingsPanel,
               ),
             )
           else
             Padding(
-              padding: const EdgeInsets.only(right: 12.0),
+              padding: const EdgeInsets.only(right: 4.0),
               child: IconButton(
-                tooltip: _timerService.muted ? 'Unmute' : 'Mute',
+                tooltip: _timerService.muted
+                    ? SimpleLocalizations.of(context).unmute
+                    : SimpleLocalizations.of(context).mute,
                 icon: Icon(
                   _timerService.muted ? Icons.volume_off : Icons.volume_up,
                 ),
@@ -233,8 +256,9 @@ class _TimerPageState extends State<TimerPage> {
                                     onPressed: _resetToDefaultConfig,
                                     icon: const Icon(Icons.restore,
                                         size: setupIconSize),
-                                    label: const Text(
-                                      'Reset to default',
+                                    label: Text(
+                                      SimpleLocalizations.of(context)
+                                          .resetToDefault,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -250,8 +274,9 @@ class _TimerPageState extends State<TimerPage> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: IconButton(
-                                    tooltip:
-                                        _timerService.muted ? 'Unmute' : 'Mute',
+                                    tooltip: _timerService.muted
+                                        ? SimpleLocalizations.of(context).unmute
+                                        : SimpleLocalizations.of(context).mute,
                                     icon: Icon(
                                       _timerService.muted
                                           ? Icons.volume_off
@@ -275,7 +300,8 @@ class _TimerPageState extends State<TimerPage> {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: IconButton(
-                                    tooltip: 'Collapse',
+                                    tooltip:
+                                        SimpleLocalizations.of(context).collapse,
                                     icon: const Icon(Icons.expand_less,
                                         size: setupIconSize),
                                     iconSize: setupIconSize,
@@ -293,7 +319,7 @@ class _TimerPageState extends State<TimerPage> {
                       ),
                     ),
                   ),
-                  crossFadeState: _settingsOpen
+                  crossFadeState: (_settingsOpen && _timerService.status == TimerStatus.stopped)
                       ? CrossFadeState.showSecond
                       : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 200),

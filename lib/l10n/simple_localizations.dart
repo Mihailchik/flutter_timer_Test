@@ -19,6 +19,28 @@ class SimpleLocalizations {
   String get replayPrepare => _t('replayPrepare');
   String get rest => _t('rest');
   String get exercise => _t('exercise');
+  String get setup => _t('setup');
+  String get closeSetup => _t('closeSetup');
+  String get mute => _t('mute');
+  String get unmute => _t('unmute');
+  String get resetToDefault => _t('resetToDefault');
+  String get collapse => _t('collapse');
+  String get timerSetup => _t('timerSetup');
+  String get addBlock => _t('addBlock');
+  String get add => _t('add');
+  String get timerBlocks => _t('timerBlocks');
+  String get noBlocks => _t('noBlocks');
+  String get blockName => _t('blockName');
+  String get repeats => _t('repeats');
+  String get timersInBlock => _t('timersInBlock');
+  String get name => _t('name');
+  String get mmss => _t('mmss');
+  String get addTimer => _t('addTimer');
+  String get block => _t('block');
+  String get startBlockName => _t('startBlockName');
+
+  String exerciseN(int n) => _tFmt('exerciseN', {'n': n});
+  String restN(int n) => _tFmt('restN', {'n': n});
 
   String repeatOf(int x, int y) => _tFmt('repeatOf', {'x': x, 'y': y});
   String blockOf(int x, int y) => _tFmt('blockOf', {'x': x, 'y': y});
@@ -48,6 +70,27 @@ class SimpleLocalizations {
       'repeatOf': 'Repeat {x} of {y}',
       'blockOf': 'Block {x} of {y}',
       'timerOf': 'Timer {x} of {y}',
+      'setup': 'Setup',
+      'closeSetup': 'Close setup',
+      'mute': 'Mute',
+      'unmute': 'Unmute',
+      'resetToDefault': 'Reset to default',
+      'collapse': 'Collapse',
+      'timerSetup': 'Timer Setup',
+      'addBlock': 'Add block',
+      'add': 'Add',
+      'timerBlocks': 'Timer blocks:',
+      'noBlocks': 'No blocks. Add a block to get started.',
+      'blockName': 'Block name',
+      'repeats': 'Repeats',
+      'timersInBlock': 'Timers in block:',
+      'name': 'Name',
+      'mmss': 'MM:SS',
+      'addTimer': 'Add timer',
+      'block': 'Block',
+      'startBlockName': 'Start block',
+      'exerciseN': 'Exercise {n}',
+      'restN': 'Rest {n}',
     },
     'ru': {
       'appTitle': 'Таймер интервальных тренировок',
@@ -61,6 +104,27 @@ class SimpleLocalizations {
       'repeatOf': 'Повтор {x} из {y}',
       'blockOf': 'Блок {x} из {y}',
       'timerOf': 'Таймер {x} из {y}',
+      'setup': 'Настройки',
+      'closeSetup': 'Закрыть настройки',
+      'mute': 'Выключить звук',
+      'unmute': 'Включить звук',
+      'resetToDefault': 'Сбросить по умолчанию',
+      'collapse': 'Свернуть',
+      'timerSetup': 'Настройка таймера',
+      'addBlock': 'Добавить блок',
+      'add': 'Добавить',
+      'timerBlocks': 'Блоки таймера:',
+      'noBlocks': 'Нет блоков. Добавьте блок, чтобы начать.',
+      'blockName': 'Название блока',
+      'repeats': 'Повторы',
+      'timersInBlock': 'Таймеры в блоке:',
+      'name': 'Название',
+      'mmss': 'ММ:СС',
+      'addTimer': 'Добавить таймер',
+      'block': 'Блок',
+      'startBlockName': 'Стартовый блок',
+      'exerciseN': 'Упражнение {n}',
+      'restN': 'Отдых {n}',
     },
   };
 }

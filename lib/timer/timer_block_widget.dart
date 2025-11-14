@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'timer_model.dart';
 import 'time_input_widget.dart';
+import '../l10n/simple_localizations.dart';
 
 class TimerBlockWidget extends StatefulWidget {
   final TimerBlock block;
@@ -77,7 +78,9 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
   }
 
   void _updateBlock() {
-    final name = _nameController.text.isEmpty ? 'Block' : _nameController.text;
+    final name = _nameController.text.isEmpty
+        ? SimpleLocalizations.of(context).block
+        : _nameController.text;
 
     int repeats = 1;
     try {
@@ -113,14 +116,15 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
   }
 
   String _generateDefaultName(int index) {
+    final loc = SimpleLocalizations.of(context);
     if (index % 2 == 0) {
       // Exercise
       final exerciseNumber = (index ~/ 2) + 1;
-      return 'Exercise $exerciseNumber';
+      return loc.exerciseN(exerciseNumber);
     } else {
       // Rest
       final restNumber = (index + 1) ~/ 2;
-      return 'Rest $restNumber';
+      return loc.restN(restNumber);
     }
   }
 
@@ -225,10 +229,11 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                       Expanded(
                         child: TextField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Block name',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
+                          decoration: InputDecoration(
+                            labelText:
+                                SimpleLocalizations.of(context).blockName,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 8,
                             ),
@@ -248,10 +253,11 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                               child: TextField(
                                 controller: _repeatsController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Repeats',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(
+                                decoration: InputDecoration(
+                                  labelText:
+                                      SimpleLocalizations.of(context).repeats,
+                                  border: const OutlineInputBorder(),
+                                  contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                     vertical: 10,
                                   ),
@@ -342,9 +348,9 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Timers in block:',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              SimpleLocalizations.of(context).timersInBlock,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             ...List.generate(widget.block.items.length, (index) {
@@ -371,10 +377,10 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                     Expanded(
                       child: TextField(
                         controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
+                        decoration: InputDecoration(
+                          labelText: SimpleLocalizations.of(context).name,
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 8,
                           ),
@@ -399,7 +405,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                             initialSeconds: item.duration,
                             onTimeChanged: (newDuration) =>
                                 _updateItemTime(index, newDuration),
-                            label: 'MM:SS',
+                            label: SimpleLocalizations.of(context).mmss,
                           ),
                         );
                       },
@@ -435,7 +441,7 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                     size: 18,
                   ), // Увеличили размер иконки
                   label: Text(
-                    'Add timer',
+                    SimpleLocalizations.of(context).addTimer,
                     style: TextStyle(fontSize: compact ? 12 : 14),
                   ),
                   style: TextButton.styleFrom(
