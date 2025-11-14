@@ -9,7 +9,10 @@ This repository contains a standard Flutter project with app sources and platfor
 - Audio cues: finish and mid‑point of long intervals
 - Material UI with Material 3 support
 
-<!-- Screenshots section removed per request -->
+## Screenshots
+![FitTimer English 1](docs/FitTimer_Eng.png)
+![FitTimer English 2](docs/FitTimer_Eng2.png)
+![FitTimer English 3](docs/FitTimer_Eng3.png)
 
 ## Quick Start
 - Install Flutter SDK.
@@ -41,7 +44,9 @@ Common platform‑specific notes and troubleshooting are in `HELP.md`.
 - Звуковые сигналы: завершение и середина длинных интервалов
 - Материальный интерфейс, поддержка Material 3
 
-<!-- Разделы со скриншотами и App Store удалены по запросу -->
+## Скриншоты
+![FitTimer Русский 1](docs/FitTimer_Ru2.png)
+![FitTimer Русский 2](docs/FitTimer_Ru3.png)
 
 ## Быстрый старт
 - Установите Flutter SDK.
