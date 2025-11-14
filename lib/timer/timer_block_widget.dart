@@ -319,25 +319,26 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                     ],
                   ),
                 ),
-                // Кнопка удаления поверх справа, не влияет на раскладку
-                if (widget.showDeleteButton)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                        size: 20,
-                      ),
-                      onPressed: widget.onDelete,
-                      padding: const EdgeInsets.all(4),
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                    ),
+                // Кнопка удаления справа — с постоянным резервом места 48×48
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: widget.showDeleteButton
+                        ? IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            onPressed: widget.onDelete,
+                            padding: EdgeInsets.zero,
+                          )
+                        : const SizedBox.shrink(),
                   ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -404,22 +405,22 @@ class _TimerBlockWidgetState extends State<TimerBlockWidget> {
                       },
                     ),
                     const SizedBox(width: 8),
-                    // Резервируем место под кнопку удаления для стабильной ширины
-                    (widget.block.items.length > 2)
-                        ? IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.grey,
-                              size: 20,
-                            ),
-                            onPressed: () => _deleteItem(index),
-                            padding: const EdgeInsets.all(4),
-                            constraints: const BoxConstraints(
-                              minWidth: 32, // Увеличили минимальную ширину
-                              minHeight: 32, // Увеличили минимальную высоту
-                            ),
-                          )
-                        : const SizedBox(width: 32, height: 32),
+                    // Резерв постоянной ширины под кнопку удаления 48
+                    SizedBox(
+                      width: 48,
+                      height: 32,
+                      child: (widget.block.items.length > 2)
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                              onPressed: () => _deleteItem(index),
+                              padding: EdgeInsets.zero,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
                 ),
               );

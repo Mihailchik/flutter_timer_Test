@@ -10,7 +10,11 @@ This repository contains a standard Flutter project with app sources and platfor
 - Material UI with Material 3 support
 
 ## Screenshots
-- Setup screen: ![Setup Screen](docs/screenshot_setup_2025-11-13.png)
+- Setup screen: ![Setup Screen](docs/screenshot_setup_2025-11-14.png)
+
+### App Store (iPhone)
+- 6.7" portrait: `docs/store/screenshot_setup_iphone_6.7_1290x2796.png`, `docs/store/screenshot_timer_iphone_6.7_1290x2796.png`
+- 6.5" portrait: `docs/store/screenshot_setup_iphone_6.5_1284x2778.png`, `docs/store/screenshot_timer_iphone_6.5_1284x2778.png`
 
 ## Quick Start
 - Install Flutter SDK.
@@ -43,7 +47,11 @@ Common platform‑specific notes and troubleshooting are in `HELP.md`.
 - Материальный интерфейс, поддержка Material 3
 
 ## Скриншот
-- Начальный экран: ![Начальный экран](docs/screenshot_setup_2025-11-13.png)
+- Начальный экран: ![Начальный экран](docs/screenshot_setup_2025-11-14.png)
+
+### Для App Store (iPhone)
+- 6.7" портрет: `docs/store/screenshot_setup_iphone_6.7_1290x2796.png`, `docs/store/screenshot_timer_iphone_6.7_1290x2796.png`
+- 6.5" портрет: `docs/store/screenshot_setup_iphone_6.5_1284x2778.png`, `docs/store/screenshot_timer_iphone_6.5_1284x2778.png`
 
 ## Быстрый старт
 - Установите Flutter SDK.

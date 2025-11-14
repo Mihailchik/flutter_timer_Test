@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../l10n/simple_localizations.dart';
-import 'package:flutter/foundation.dart';
 import 'timer_model.dart';
 import 'timer_service.dart';
 import 'timer_setup_widget.dart';
@@ -47,6 +46,11 @@ class _TimerPageState extends State<TimerPage> {
     // Загружаем настройку mute
     _timerService.loadMuted();
     // Рантайм-состояние таймера не восстанавливаем — сохраняем только конфигурацию
+    if (const bool.fromEnvironment('AUTO_START')) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startTimer();
+      });
+    }
   }
 
   Future<void> _initLoad() async {
@@ -171,11 +175,26 @@ class _TimerPageState extends State<TimerPage> {
         title: Text(SimpleLocalizations.of(context).appTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          IconButton(
-            tooltip: _settingsOpen ? 'Close setup' : 'Setup',
-            icon: Icon(_settingsOpen ? Icons.close : Icons.settings),
-            onPressed: _toggleSettingsPanel,
-          ),
+          if (_timerService.status == TimerStatus.stopped)
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: IconButton(
+                tooltip: _settingsOpen ? 'Close setup' : 'Setup',
+                icon: Icon(_settingsOpen ? Icons.close : Icons.settings),
+                onPressed: _toggleSettingsPanel,
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: IconButton(
+                tooltip: _timerService.muted ? 'Unmute' : 'Mute',
+                icon: Icon(
+                  _timerService.muted ? Icons.volume_off : Icons.volume_up,
+                ),
+                onPressed: _toggleMute,
+              ),
+            ),
         ],
       ),
       body: Container(
@@ -307,7 +326,7 @@ class _TimerPageState extends State<TimerPage> {
                             ),
                             child: Text(
                               SimpleLocalizations.of(context).start,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
